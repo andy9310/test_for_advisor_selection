@@ -46,6 +46,11 @@ const router = createRouter({
       component: () => import('../views/SystemParameter.vue')
     },
     {
+      path: '/admin-studentgroup/:team',
+      name: 'StudentGroup',
+      component: () => import('../views/StudentGroup.vue')
+    },
+    {
       path: '/',
       redirect: '/login'
     },

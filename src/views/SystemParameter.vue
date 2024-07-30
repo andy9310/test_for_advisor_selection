@@ -142,7 +142,9 @@ export default{
                     <div class="flex flex-col border-b border-slate-300">
                         <div class="flex flex-col my-5">
                             <h1 class="font-bold text-xl mb-5">學生</h1>
-                            <button class="ml-20 border border-black rounded-md px-3 py-2 w-32">編輯學生群組</button>
+                            <router-link :to="`/admin-studentgroup/${currenttab}`">
+                                <button class="ml-20 border border-black rounded-md px-3 py-2 w-32">編輯學生群組</button>
+                            </router-link>
                         </div>
                         <div class="flex flex-col my-5">
                             <h1 class="font-bold text-xl mb-5">教授</h1>
