@@ -41,6 +41,11 @@ const router = createRouter({
       component: () => import('../views/Alert/AlertPatchGroup.vue'),
     },
     {
+      path: '/alert-fillexaminee/:team/:group',
+      name: 'AlertFillExaminee',
+      component: () => import('../views/Alert/AlertFillExaminee.vue'),
+    },
+    {
       path: '/admin-systemparameter',
       name: 'admin system parameter',
       component: () => import('../views/SystemParameter.vue')
