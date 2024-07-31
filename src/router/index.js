@@ -56,6 +56,11 @@ const router = createRouter({
       component: () => import('../views/StudentGroup.vue')
     },
     {
+      path: '/admin-accountmanage',
+      name: 'AccountManage',
+      component: () => import('../views/AccountManage.vue')
+    },
+    {
       path: '/',
       redirect: '/login'
     },

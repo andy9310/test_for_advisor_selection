@@ -11,6 +11,9 @@ export default{
   },
   setup(){
     const students = ref(
+    [{
+    groupName:'甄試正取生',
+    groupInfo:
         [
             {
                 admission:'甄試',
@@ -29,6 +32,28 @@ export default{
                 click:false,
             },
         ]
+    },{
+    groupName:'甄試備取生',
+    groupInfo:
+        [
+            {
+                admission:'甄試',
+                rank:1,
+                name:'王陽明',
+                testNumber:'1917003',
+                check:true,
+                click:false,
+            },
+            {
+                admission:'甄試',
+                rank:2,
+                name:'徐凱駿',
+                testNumber:'1917013',
+                check:false,
+                click:false,
+            },
+        ]
+    }] 
     );
     const date = ref();
     onMounted(() => {
@@ -39,6 +64,9 @@ export default{
     return {
       date,students
     }
+  },
+  mounted(){
+    this.created();
   },
   data() {
     return {
@@ -54,9 +82,7 @@ export default{
         parameter:{
             semester_year:'114'
         },
-        tabs: ['甲組','乙組','丙組'],
         currentteam: '甲組',
-        groups:['甄試正取生','甄試備取生'],
     };
   },
   methods: {
@@ -69,11 +95,13 @@ export default{
     created(){
         this.currentteam = this.$route.params.team
     },
-    OpenMenu(student){
+    OpenMenu(info){
         this.students.forEach(element => {
-            element.click = false;
+            element.groupInfo.forEach( info=>{
+                info.click = false;
+            });
         });
-        student.click = true;
+        info.click = true;
     }
   },
 }
@@ -130,9 +158,9 @@ export default{
                         <h1 class="text-xl font-extrabold">編輯{{currentteam}}學生群組</h1>
                         <p class="underline">新增群組</p>
                     </div>
-                    <div class="flex flex-col pl-10 pt-8 justify-center" v-for="group in groups" :key="group" >
+                    <div class="flex flex-col pl-10 pt-8 justify-center" v-for="student in students" :key="student.groupName" >
                         <div class="flex flex-row items-center">
-                            <h1 class="text-xl font-bold">{{group}}</h1>
+                            <h1 class="text-xl font-bold">{{student.groupName}}</h1>
                             <img src="@/assets/edit.png" class="w-5 h-5 ml-3">
                         </div>
                         <div class="flex flex-row items-center my-3" >
@@ -175,17 +203,17 @@ export default{
                                 <h1 class="w-56 my-5 mx-7 text-center">考生姓名</h1>
                                 <h1 class="w-56 my-5 mx-7 text-center">准考證號</h1>
                             </div>
-                            <draggable v-model="students" 
+                            <draggable v-model="student.groupInfo" 
                                     tag="ol"  
                                     animation="200"
                                     ghost-class="ghost"
                                     :forceFallback="true"
                                     :fallbackOnBody="true"
                                     fallbackClass="fallback" >
-                                <template #item="{element: student}" >
+                                <template #item="{element: info}" >
                                     
-                                    <div class="flex flex-row w-full relative border-b border-slate-300" @contextmenu.prevent="OpenMenu(student)" @click="student.click=false">
-                                        <div v-if="student.click==true" class="z-50 rounded-lg h-48 w-48 border bg-white absolute top-10 right-40 flex flex-col">
+                                    <div class="flex flex-row w-full relative border-b border-slate-300" @contextmenu.prevent="OpenMenu(info)" @click="info.click=false">
+                                        <div v-if="info.click==true" class="z-50 rounded-lg h-48 w-48 border bg-white absolute top-10 right-40 flex flex-col">
                                             <div class="flex flex-row justify-start mt-4 mb-2">
                                                 <div class="w-12 justify-end flex flex-row">
                                                     <img src="@/assets/edit.png" class="h-5 w-5 cursor-pointer">
@@ -213,27 +241,17 @@ export default{
                                         </div>
                                         <div class="w-56 my-5 mx-7  items-center justify-center flex flex-row">
                                             <img src="@/assets/drag.png" class=" cursor-pointer">
-                                            <h1>{{student.admission}}</h1>
+                                            <h1>{{info.admission}}</h1>
                                         </div>
-                                        <h1 class="w-56 my-5 mx-7 text-center">{{ student.rank }}</h1>
-                                        <h1 class="w-56 my-5 mx-7 text-center">{{student.name  }}</h1>
-                                        <h1 class="w-56 my-5 mx-7 text-center">{{ student.testNumber }}</h1>
+                                        <h1 class="w-56 my-5 mx-7 text-center">{{ info.rank }}</h1>
+                                        <h1 class="w-56 my-5 mx-7 text-center">{{info.name  }}</h1>
+                                        <h1 class="w-56 my-5 mx-7 text-center">{{ info.testNumber }}</h1>
                                         <div class="w-56 my-5 mx-7 items-center">
-                                            <img v-if="student.check==true" src="@/assets/check.png" class=" cursor-pointer">
+                                            <img v-if="info.check==true" src="@/assets/check.png" class=" cursor-pointer">
                                         </div>
                                     </div>
                                 </template>
                             </draggable>
-                            <!-- <div v-for="student in students" :key="student" class="flex flex-row w-full" >
-                                <h1 class="w-56 my-5 mx-7  text-center">{{student.admission}}</h1>
-                                <h1 class="w-56 my-5 mx-7 text-center">{{ student.rank }}</h1>
-                                <h1 class="w-56 my-5 mx-7 text-center">{{student.name  }}</h1>
-                                <h1 class="w-56 my-5 mx-7 text-center">{{ student.testNumber }}</h1>
-                                <div class="w-56 my-5 mx-7 items-center">
-                                    <img v-if="student.check==true" src="@/assets/check.png" class=" cursor-pointer">
-                                </div>
-                            </div> -->
-                            
                         </div>
                     </div>
                     

@@ -69,10 +69,12 @@ export default{
                             <img src="@/assets/arrow.png" class="w-16 h-16">
                         </div>
                     </router-link>
-                    <div class="rounded-3xl bg-white bg-opacity-90 text-black flex flex-row text-center items-center justify-between w-128 h-44 z-50 px-12 hover:bg-slate-300 hover:-translate-y-1 hover:scale-110">
-                        <h1 class="text-4xl">帳號管理</h1>
-                        <img src="@/assets/arrow.png" class="w-16 h-16">
-                    </div>
+                    <router-link to="/admin-accountmanage">
+                        <div class="rounded-3xl bg-white bg-opacity-90 text-black flex flex-row text-center items-center justify-between w-128 h-44 z-50 px-12 hover:bg-slate-300 hover:-translate-y-1 hover:scale-110">
+                            <h1 class="text-4xl">帳號管理</h1>
+                            <img src="@/assets/arrow.png" class="w-16 h-16">
+                        </div>
+                    </router-link>
                 </div>
                 <div class="flex flex-row justify-around mt-16">
                     <div class="rounded-3xl bg-white bg-opacity-90  text-black flex flex-row text-center items-center justify-between w-128 h-44  z-50 px-12 hover:bg-slate-300 hover:-translate-y-1 hover:scale-110">
