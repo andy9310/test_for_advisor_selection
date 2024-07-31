@@ -1,11 +1,9 @@
 <script >
-import BlackButton from '@/components/BlackButton.vue';
 import PlainTextField from '../components/PlainTextField.vue';
 import TeamChip from '../components/TeamChip.vue';
 export default{
   components: {
     PlainTextField,
-    BlackButton,
     TeamChip,
   },
   data() {
@@ -26,9 +24,9 @@ export default{
         {name:'楊鈞安',mail:'789@gmail.com',teams:['甲組'],type:'cc'}
         ],
         students:[
-        {name:'王小名',mail:'123@gmail.com',teams:['甲組'],group:'甄試備取生'},
-        {name:'楊小名',mail:'456@gmail.com',teams:['乙組'],group:'甄試備取生'},
-        {name:'楊小明',mail:'789@gmail.com',teams:['甲組'],group:'考試備取生'}
+        {name:'王小名',mail:'123@gmail.com',teams:['甲組'],group:'甄試備取生',number:'L123456',phone:'0975647589'},
+        {name:'楊小名',mail:'456@gmail.com',teams:['乙組'],group:'甄試備取生',number:'L787687',phone:'0921803680'},
+        {name:'楊小明',mail:'789@gmail.com',teams:['甲組'],group:'考試備取生',number:'L998388',phone:'0977876545'}
         ]
     };
   },
@@ -123,28 +121,35 @@ export default{
                     </div>
                     <div class="border rounded-lg flex flex-col mb-20 my-5">
                         <div class="flex flex-row border-b">
-                            <h1 class="my-3 pl-10 w-56 text-start">學生姓名</h1>
-                            <h1 class="my-3 pl-10 w-72 text-start">信箱</h1>
-                            <h1 class="my-3 pl-10 w-56 text-start">組別</h1>
-                            <h1 class="my-3 pl-10 w-56 text-start">組別群組名</h1>
-                            <h1 class="my-3 pl-10 w-56 text-start">准考證號</h1>
-                            <h1 class="my-3 pl-10 w-56 text-start">行動電話</h1>
+                            <h1 class="my-3 pl-10 w-40 text-start">學生姓名</h1>
+                            <h1 class="my-3 pl-10 w-52 text-start">信箱</h1>
+                            <h1 class="my-3 pl-10 w-48 text-start">組別</h1>
+                            <h1 class="my-3 pl-10 w-48 text-start">組別群組名</h1>
+                            <h1 class="my-3 pl-10 w-48 text-start">准考證號</h1>
+                            <h1 class="my-3 pl-10 w-48 text-start">行動電話</h1>
                         </div>
                         <div v-for="student in students" :key="student" class="flex flex-row my-3">
-                            <h1 class="my-3 pl-10 w-56 text-start">{{ student.name }}</h1>
-                            <h1 class="my-3 pl-10 w-72 text-start">{{ student.mail }}</h1>
-                            <div  class="my-3 pl-10 w-56 flex flex-row items-start">
-                                <TeamChip :buttonType="student.teams "/>
+                            <h1 class="my-3 pl-10 w-40 text-start">{{ student.name }}</h1>
+                            <h1 class="my-3 pl-10 w-52 text-start">{{ student.mail }}</h1>
+                            <div  class="my-3 pl-10 w-48 flex flex-row items-start">
+                                <TeamChip :buttonType="student.teams[0] "/>
                             </div>
-                            <h1 class="my-3 pl-10 w-72 text-start">{{ student.group }}</h1>
-                            
+                            <h1 class="my-3 pl-10 w-48 text-start">{{ student.group }}</h1>
+                            <h1 class="my-3 pl-10 w-48 text-start">{{ student.number }}</h1>
+                            <h1 class="my-3 pl-10 w-48 text-start">{{ student.phone }}</h1>
+                            <div class="flex flex-row justify-between items-start mt-3">
+                                <img src="@/assets/edit.png" class="w-5 h-5 mr-3">
+                                <router-link :to="`/alert-admin-resetpassword/${student.name}`"> 
+                                    <img src="@/assets/password.png" class="w-5 h-5 mr-3">
+                                </router-link>
+                                <router-link :to="`/alert-admin-deleteaccount/${student.name}`"> 
+                                    <img src="@/assets/trash.png" class="w-5 h-5 mr-3">
+                                </router-link>
+                            </div>
                         </div>
 
                     </div>
                 </div>
-                    <div class="flex justify-end">
-                        <BlackButton buttonType="儲存" length="w-button-short"></BlackButton>
-                    </div>
             </div>
                 
         </div>

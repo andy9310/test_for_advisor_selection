@@ -1,20 +1,19 @@
 <script>
   export default {
-    name: 'AlertDeleteGroup',
+    name: 'AlertDeleteAccount',
     data(){
         return{
-            group:''
+            name:''
         }
     },
     created(){
-        this.group = this.$route.params.group
-        console.log(this.$route.params.group)
+        this.name = this.$route.params.name
     },
     computed: {
     },
     methods: {
       closeAlert() {
-        this.$router.replace('/admin-systemparameter');
+        this.$router.replace('/admin-accountmanage');
       }
     }
   }
@@ -29,9 +28,9 @@
           <div class="flex flex-row items-center">
             <img src="@/assets/alert-filled.png" class="h-20 w-20">
             <div class="flex flex-col">
-              <h1 class="text-2xl">刪除名額限制規則?</h1>
+              <h1 class="text-2xl">刪除帳號</h1>
               <div class="flex flex-row">
-                <h1>確定刪除</h1><h1 class="font-bold">{{group}}</h1><h1>的名額限制規則嗎?</h1>
+                <h1>此操作無法回覆，確定要刪除</h1><h1 class="font-bold">{{name}}</h1><h1>的帳號嗎?</h1>
               </div>
             </div>
           </div>

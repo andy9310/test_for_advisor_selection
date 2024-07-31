@@ -46,6 +46,21 @@ const router = createRouter({
       component: () => import('../views/Alert/AlertFillExaminee.vue'),
     },
     {
+      path: '/alert-admin-resetpassword/:name',
+      name: 'AlertResetPassword',
+      component: () => import('../views/Alert/AlertResetPassword.vue'),
+    },
+    {
+      path: '/alert-admin-deleteaccount/:name',
+      name: 'AlertDeleteAccount',
+      component: () => import('../views/Alert/AlertDeleteAccount.vue'),
+    },
+    {
+      path: '/alert-admin-revisestudentaccount/:name',
+      name: 'AlertReviseStudentAccount',
+      component: () => import('../views/Alert/AlertReviseStudentAccount.vue'),
+    },
+    {
       path: '/admin-systemparameter',
       name: 'admin system parameter',
       component: () => import('../views/SystemParameter.vue')
