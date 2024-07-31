@@ -25,6 +25,11 @@ export default{
         {name:'楊凱駿',mail:'456@gmail.com',teams:['乙組'],type:'cc'},
         {name:'楊鈞安',mail:'789@gmail.com',teams:['甲組'],type:'cc'}
         ],
+        students:[
+        {name:'王小名',mail:'123@gmail.com',teams:['甲組'],group:'甄試備取生'},
+        {name:'楊小名',mail:'456@gmail.com',teams:['乙組'],group:'甄試備取生'},
+        {name:'楊小明',mail:'789@gmail.com',teams:['甲組'],group:'考試備取生'}
+        ]
     };
   },
   methods: {
@@ -100,30 +105,39 @@ export default{
                             <div  class="my-3 pl-10 w-72 flex flex-row items-start">
                                 <TeamChip v-for="team in advisor.teams" :key="team" :buttonType="team"/>
                             </div>
-                            <h1 v-if="advisor.type=='local'" class="my-3 pl-10 w-72 text-start">本地帳號</h1>
-                            <h1 v-if="advisor.type=='cc'" class="my-3 pl-10 w-72 text-start">計中帳號</h1>
-                            
+                            <h1 v-if="advisor.type=='local'" class="my-3 pl-10 pt-3 w-40 items-center">本地帳號</h1>
+                            <h1 v-if="advisor.type=='cc'" class="my-3 pl-10 pt-3 w-40 text-start">計中帳號</h1>
+                            <div class="flex flex-row justify-between items-center">
+                                <img src="@/assets/edit.png" class="w-5 h-5 mr-3">
+                                <img src="@/assets/password.png" class="w-5 h-5 mr-3">
+                                <img src="@/assets/trash.png" class="w-5 h-5 mr-3">
+                            </div>
                         </div>
 
                     </div>
+                    <div class="flex flex-row justify-between">
+                        <h1 class="text-2xl font-extrabold">學生帳號</h1>
+                        <div class="flex flex-row items-center">
+                            <PlainTextField length="w-short" />
+                        </div>
+                    </div>
                     <div class="border rounded-lg flex flex-col mb-20 my-5">
                         <div class="flex flex-row border-b">
-                            <h1 class="my-3 mx-14">教授姓名</h1>
-                            <h1 class="my-3 mx-14">信箱</h1>
-                            <h1 class="my-3 mx-14">組別</h1>
-                            <h1 class="my-3 mx-14">帳號類型</h1>
-                            <h1 class="my-3 mx-14">考試報到生已同意</h1>
-                            <h1 class="my-3 mx-14">手動調整</h1>
-                            <h1 class="my-3 mx-14">總共已同意學生數</h1>
+                            <h1 class="my-3 pl-10 w-56 text-start">學生姓名</h1>
+                            <h1 class="my-3 pl-10 w-72 text-start">信箱</h1>
+                            <h1 class="my-3 pl-10 w-56 text-start">組別</h1>
+                            <h1 class="my-3 pl-10 w-56 text-start">組別群組名</h1>
+                            <h1 class="my-3 pl-10 w-56 text-start">准考證號</h1>
+                            <h1 class="my-3 pl-10 w-56 text-start">行動電話</h1>
                         </div>
-                        <div v-for="advisor in advisors" :key="advisor" class="flex flex-row my-3">
-                            <h1 class="my-3 mx-14">{{ advisor }}</h1>
-                            <PlainTextField length="w-short"  :class="'my-3 mx-14'" v-model="parameter.semester_year" />
-                            <h1 class="my-3 mx-14 w-32 text-center">1</h1>
-                            <h1 class="my-3 mx-14 w-32 text-center">1</h1>
-                            <h1 class="my-3 mx-14 w-32 text-center">1</h1>
-                            <h1 class="my-3 mx-14 w-32 text-center">1</h1>
-                            <h1 class="my-3 mx-14 w-32 text-center">1</h1>
+                        <div v-for="student in students" :key="student" class="flex flex-row my-3">
+                            <h1 class="my-3 pl-10 w-56 text-start">{{ student.name }}</h1>
+                            <h1 class="my-3 pl-10 w-72 text-start">{{ student.mail }}</h1>
+                            <div  class="my-3 pl-10 w-56 flex flex-row items-start">
+                                <TeamChip :buttonType="student.teams "/>
+                            </div>
+                            <h1 class="my-3 pl-10 w-72 text-start">{{ student.group }}</h1>
+                            
                         </div>
 
                     </div>
