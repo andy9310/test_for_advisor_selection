@@ -76,6 +76,26 @@ const router = createRouter({
       component: () => import('../views/AccountManage.vue')
     },
     {
+      path: '/admin-preferencemanage',
+      name: 'PreferenceManage',
+      component: () => import('../views/PreferenceManage.vue')
+    },
+    {
+      path: '/admin-changemanage',
+      name: 'ChangeManage',
+      component: () => import('../views/ChangeManage.vue')
+    },
+    {
+      path: '/student',
+      name: 'UserStudent',
+      component: () => import('../views/UserStudent.vue')
+    },
+    {
+      path: '/advisor',
+      name: 'UserAdvisor',
+      component: () => import('../views/UserAdvisor.vue')
+    },
+    {
       path: '/',
       redirect: '/login'
     },
