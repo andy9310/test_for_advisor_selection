@@ -143,7 +143,9 @@ export default{
                     </div>
                     <div class="flex flex-row my-5 justify-between items-center">
                         <h1 class="font-bold text-xl ">異動紀錄</h1>
-                        <p class="underline text-[#513AA6]">新增異動</p>
+                        <router-link to="/alert-admin-addchange">
+                            <p class="underline text-[#513AA6]">新增異動</p>
+                        </router-link>
                     </div>
                     <div class="flex flex-col border border-slate-300 rounded-xl">
                         <div class="flex flex-row   border-b border-slate-300">

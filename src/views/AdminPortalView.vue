@@ -21,10 +21,10 @@ export default{
 
 <template>
     <div class="flex h-screen flex-col overflow-hidden bg-[url('../assets/gradient.png')] bg-cover relative">
-        <img src="@/assets/G.png" class=" absolute top-8 left-84rem w-28 h-28 z-40">
-        <img src="@/assets/I.png" class=" absolute top-96 w-12 h-28 z-40">
-        <img src="@/assets/C.png" class=" absolute bottom-52 right-1 w-28 h-28 z-40">
-        <img src="@/assets/E.png" class=" absolute bottom-1 left-25rem w-28 h-28 z-40">
+        <img src="@/assets/G.png" class=" absolute top-8 left-84rem w-28 h-28 z-10">
+        <img src="@/assets/I.png" class=" absolute top-96 w-12 h-28 z-10">
+        <img src="@/assets/C.png" class=" absolute bottom-52 right-1 w-28 h-28 z-10">
+        <img src="@/assets/E.png" class=" absolute bottom-1 left-25rem w-28 h-28 z-10">
         
         <div class=" flex flex-row justify-between pt-8 ml-16">
             <h1 class="text-2xl font-bold pl-10">臺大電信所指導教授填選系統</h1>
@@ -34,7 +34,7 @@ export default{
                 <router-link to="/login"><img src="@/assets/logout.png" class="w-6 h-6 mx-1"></router-link>
             </div>
         </div>
-        <div class="flex flex-row justify-around">
+        <div class="flex flex-row justify-around z-40">
             <div class="flex flex-col ml-16 mt-10">
                 <div class="flex flex-row items-center mt-2">
                     <img src="@/assets/graycircle.png" class="w-3 h-3 mr-3">

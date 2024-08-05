@@ -86,7 +86,9 @@ export default{
                         <h1 class="text-2xl font-extrabold">教授帳號</h1>
                         <div class="flex flex-row items-center">
                             <p class="underline mx-3 text-[#513AA6]">從大量寄信系統下載教授帳號</p>
-                            <p class="underline mx-3 text-[#513AA6]">新增帳號</p>
+                            <router-link :to="`/alert-admin-addadvisor`">
+                                <p class="underline mx-3 text-[#513AA6]">新增帳號</p>
+                            </router-link>
                             <PlainTextField length="w-short" />
                         </div>
                     </div>
@@ -138,7 +140,9 @@ export default{
                             <h1 class="my-3 pl-10 w-48 text-start">{{ student.number }}</h1>
                             <h1 class="my-3 pl-10 w-48 text-start">{{ student.phone }}</h1>
                             <div class="flex flex-row justify-between items-start mt-3">
-                                <img src="@/assets/edit.png" class="w-5 h-5 mr-3">
+                                <router-link :to="`/alert-admin-revisestudentaccount/${student.name}`"> 
+                                    <img src="@/assets/edit.png" class="w-5 h-5 mr-3">
+                                </router-link>
                                 <router-link :to="`/alert-admin-resetpassword/${student.name}`"> 
                                     <img src="@/assets/password.png" class="w-5 h-5 mr-3">
                                 </router-link>

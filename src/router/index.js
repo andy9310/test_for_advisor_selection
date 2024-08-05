@@ -61,6 +61,16 @@ const router = createRouter({
       component: () => import('../views/Alert/AlertReviseStudentAccount.vue'),
     },
     {
+      path: '/alert-admin-addchange',
+      name: 'AddChange',
+      component: () => import('../views/Alert/AlertAddChange.vue'),
+    },
+    {
+      path: '/alert-admin-addadvisor',
+      name: 'AddAdvisor',
+      component: () => import('../views/Alert/AlertAddAdvisor.vue'),
+    },
+    {
       path: '/admin-systemparameter',
       name: 'admin system parameter',
       component: () => import('../views/SystemParameter.vue')
