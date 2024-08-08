@@ -5,6 +5,7 @@ export default {
         onInput(event) {
             const newValue = event.target.value;
             this.$emit('update:modelValue', newValue); 
+            this.$emit('validate');
         },
         togglePasswordVisibility() {
             this.passwordVisible = !this.passwordVisible;
@@ -32,12 +33,13 @@ export default {
             <input
                 :type="passwordVisible ? 'text' : 'password'"
                 v-if="textType == '密碼' || textType == '確認密碼' || textType == '新密碼' || textType == '確認新密碼'"
-                class="ml-3 w-full border-b-0 bg-transparent focus:outline-none text-2xl "
+                class="ml-3 w-full border-b-0 bg-transparent focus:outline-none text-2xl tracking-widest"
                 :value="modelValue"
                 @input="onInput"
             />
             <span v-if="textType == '密碼' || textType == '確認密碼' || textType == '新密碼' || textType == '確認新密碼'" @click="togglePasswordVisibility">
-                <img src="@/assets/eye.png" class="w-5 h-5 mr-3 cursor-pointer">
+                <img v-if="passwordVisible===false" src="@/assets/eye.png" class="w-5 h-5 mr-3 cursor-pointer">
+                <img v-if="passwordVisible===true" src="@/assets/eye-close.png" class="w-5 h-5 mr-3 cursor-pointer">
             </span> 
         </div>
     </div>

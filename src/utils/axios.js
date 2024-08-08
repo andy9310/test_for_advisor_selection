@@ -3,10 +3,9 @@ import { StatusCodeInterpretation } from '../models/error'
 import { toast } from 'vue3-toastify'
 
 const axiosInstance = axios.create({
-  baseURL: 'https://comm.ntu.edu.tw/testing/academic_paper_award_backend',
+  baseURL: process.env.VUE_APP_BACKEND_URL,
   headers: { 'Content-Type': 'application/json' }
 })
-
 axiosInstance.interceptors.request.use(
   (config) => {
     if (!config.noToast) config.toastId = toast.info('載入中')

@@ -1,14 +1,16 @@
 <script >
 import BlackButton from '@/components/BlackButton.vue';
-import Terms from '../components/LoginTerms.vue'
-import TextField from '../components/TextField.vue'
+import Terms from '../components/LoginTerms.vue';
+import TextField from '../components/TextField.vue';
+import axios from '../utils/axios';
+import {getUserMe} from '../utils/account';
 export default{
   components: {
     TextField,
     Terms,
     BlackButton,
   },
-  data() {
+  data() {  
     return {
       loginUser:{
         email:'',
@@ -17,6 +19,26 @@ export default{
     };
   },
   methods: {
+    async toggle(){
+      const response = await axios.post('/auth/login', {
+        ...this.loginUser
+      })
+      if (response?.status == 200) {
+        localStorage.setItem('token', response.data.jwt_token);
+        localStorage.setItem('email', this.loginUser.email);
+        await getUserMe();
+        alert(this.$store.state.type)
+        if(this.$store.state.type==='admin'){
+          this.$router.push({ path: '/admin-portal' })
+        }
+        else if(this.$store.state.type==='student'){
+          this.$router.push({ path: '/student' })
+        }
+        else{
+          this.$router.push({ path: '/advisor' })
+        }
+      }
+    }
   },
 }
 </script>
@@ -44,7 +66,7 @@ export default{
                 <div class=" w-button-longer">
                   <TextField textType="帳號" class="mt-4 " v-model="loginUser.email" />
                   <TextField textType="密碼" class="mt-4" v-model="loginUser.password" />
-                  <BlackButton buttonType="登入" length="w-button-longer"/>
+                  <BlackButton buttonType="登入" length="w-button-longer" @toggle="toggle"/>
                 </div>
                 <div class="flex flex-row">
                   <router-link to="/register" class="text-violet-600 ">註冊帳號</router-link>
@@ -55,7 +77,7 @@ export default{
             <div class="rounded-3xl bg-gray-100 bg-opacity-30 backdrop-blur-sm flex flex-col text-center justify-center items-center  w-11/12 h-2/6 mt-10 z-50">
               <h1 class="text-xl font-bold">電信所現職教師</h1>
               <div class=" w-9/12">
-                <BlackButton buttonType="臺大計中帳號登入" length="w-button-longer"/>
+                <BlackButton buttonType="臺大計中帳號登入" length="w-button-longer" @toggle="toggle"/>
               </div>
             </div>
         </div>

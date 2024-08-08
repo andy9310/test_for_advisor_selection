@@ -1,24 +1,42 @@
 <script>
 import BlackButton from '@/components/BlackButton.vue';
-import TextField from '../components/TextField.vue'
+import TextField from '../components/TextField.vue';
+import { toast } from 'vue3-toastify';
+// import validate from '../utils/validate'
+import axios from '../utils/axios';
 export default{
+  setup(){
+  },
   components: {
     TextField,
     BlackButton,
   },
   data() {
-    return {
-      registerUser:{
+    return{
+      confirmPassword:'',
+      user:{
         email:'',
-        name:'',
-        testNumber:'',
-        phoneNumber:'',
         password:'',
-        confirmPassword:'',
+        student:{
+          name:'',
+          teamType:'A',
+          examineeNumber:'',
+          phoneNumber:'',
+        }
       }
     };
   },
   methods: {
+    async postRegister(){
+      const response = await axios.post('/auth/register', {
+        ...this.user
+      })
+      if (response?.status == 200) {
+        toast.success('註冊成功，5秒後將自動跳轉到登入頁面')
+        setTimeout(() => this.$router.push({ path: '/login' }), 5000)
+      }
+    }
+
   },
 }
 </script>
@@ -35,17 +53,17 @@ export default{
                     <h1 class="text-5xl pb-12 pt-12 font-bold">臺大電信所 <br/>指導教授填選系統</h1>
                 </div>
             </div>
-            <div class="flex flex-col h-full mt-10 ">
-                <div class="rounded-3xl bg-gray-100 bg-opacity-30 backdrop-blur-sm  flex flex-col text-center items-center  w-11/12 h-5/6 z-50">
+            <div class="flex flex-col h-full mt-10 justify-center items-center">
+                <div class="rounded-3xl bg-gray-100 bg-opacity-30 backdrop-blur-sm  flex flex-col text-center items-center  w-9/12 h-5/6 z-50">
                     <h1 class="text-xl font-bold">註冊帳號</h1>
                     <div class=" w-button-longer">
-                        <TextField textType="Email帳號" class="mt-4 " v-model="registerUser.email" />
-                        <TextField textType="學生姓名" class="mt-4" v-model="registerUser.name" />
-                        <TextField textType="准考證號" class="mt-4 " v-model="registerUser.testNumber" />
-                        <TextField textType="行動電話" class="mt-4 " v-model="registerUser.phoneNumber" />
-                        <TextField textType="密碼" class="mt-4 " v-model="registerUser.password" />
-                        <TextField textType="確認密碼" class="mt-4 " v-model="registerUser.confirmPassword" />
-                        <BlackButton buttonType="註冊" length="w-button-longer"/>
+                      <TextField textType="Email帳號" class="mt-5 " v-model="user.email"/>
+                      <TextField textType="學生姓名" class="mt-5" v-model="user.name" />
+                      <TextField textType="准考證號" class="mt-5 " v-model="user.examineeNumber" />
+                      <TextField textType="行動電話" class="mt-5 " v-model="user.phoneNumber" />
+                      <TextField textType="密碼" class="mt-5 " v-model="user.password"/>
+                      <TextField textType="確認密碼" class="mt-5 " v-model="confirmPassword" />
+                      <BlackButton buttonType="註冊" length="w-button-longer" @toggle-register="postRegister"/>
                     </div>
                 </div>
             </div>

@@ -1,6 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-
-// import { isAuthenticated } from '@/utils/auth'
+import { isAuthenticated } from '../utils/account'
 
 const router = createRouter({
   history: createWebHashHistory('/testing/academic_paper_award-mVgBO4y5dvkZ5slhGLjNbMgANP1ZxPDn/dist'),
@@ -113,14 +112,14 @@ const router = createRouter({
   ]
 })
 
-// router.beforeEach(async (to, from, next) => {
-//   if (to.path != '/login' && to.path != '/register') {
-//     if (await isAuthenticated()) next()
-//     else next({ path: '/login' })
-//   } else {
-//     next()
-//   }
-// })
+router.beforeEach(async (to, from, next) => {
+  if (to.path != '/login' && to.path != '/register') {
+    if (await isAuthenticated()) next()
+    else next({ path: '/login' })
+  } else {
+    next()
+  }
+})
 
 export default router
 

@@ -58,6 +58,15 @@ export default {
             wide: '0.125em',  // Example: Adds slightly wider spacing
             wider: '0.25em',  // Example: Adds more space
             widest: '0.5em'   // Example: Adds the most space
+          },
+          letterSpacing: {
+            tightest: '-.075em',
+            tighter: '-.05em',
+            tight: '-.025em',
+            normal: '0',
+            wide: '.025em',
+            wider: '.05em',
+            widest: '.3em',
           }
       },
   },
