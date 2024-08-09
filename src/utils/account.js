@@ -6,12 +6,13 @@ export const getUserMe = async() =>{
     if (localToken) {
         const response = await axios.get('/account/'+localEmail)
         if (response?.status == 200) {
+            console.log(response.data);
             store.state.token = localToken
-            store.state.name = store.state.advisor===undefined?
-                ( store.state.student===undefined?'管理者':response.data.student.name):response.data.advisor.name
+            store.state.name = response.data.advisor===undefined?
+                ( response.data.student===undefined?'管理者':response.data.student.name):response.data.advisor.name
             store.state.email = response.data.email
-            store.state.type = store.state.advisor===undefined?
-            ( store.state.student===undefined?'admin':'student'):'advisor'
+            store.state.type = response.data.advisor===undefined?
+            ( response.data.student===undefined?'admin':'student'):'advisor'
         }else {
             const error = response
             if (error.response.status == 401) localStorage.removeItem('token')

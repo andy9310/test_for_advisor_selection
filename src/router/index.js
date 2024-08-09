@@ -45,12 +45,12 @@ const router = createRouter({
       component: () => import('../views/Alert/AlertFillExaminee.vue'),
     },
     {
-      path: '/alert-admin-resetpassword/:name',
+      path: '/alert-admin-resetpassword/:email',
       name: 'AlertResetPassword',
       component: () => import('../views/Alert/AlertResetPassword.vue'),
     },
     {
-      path: '/alert-admin-deleteaccount/:name',
+      path: '/alert-admin-deleteaccount/:email',
       name: 'AlertDeleteAccount',
       component: () => import('../views/Alert/AlertDeleteAccount.vue'),
     },
@@ -58,6 +58,11 @@ const router = createRouter({
       path: '/alert-admin-revisestudentaccount/:name',
       name: 'AlertReviseStudentAccount',
       component: () => import('../views/Alert/AlertReviseStudentAccount.vue'),
+    },
+    {
+      path: '/alert-admin-reviseadvisor/:email',
+      name: 'AlertReviseAdvisor',
+      component: () => import('../views/Alert/AlertReviseAdvisor.vue'),
     },
     {
       path: '/alert-admin-addchange',

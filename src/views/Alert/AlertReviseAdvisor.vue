@@ -7,30 +7,38 @@ import axios from '../../utils/axios';
       return {
         accountInfo:{
           email:'',
-          password:'andy9310',
           advisor:{
             name:'',
             A:false,
             B:false,
             C:false,
-            accountType:'localAccount'
           }
         },
       };
     },
+    created(){
+        this.accountInfo.email = this.$route.params.email
+    },
+    mounted(){
+        this.getAccount();
+    },
     computed: {
-      
     },
     methods: {
       closeAlert() {
         this.$router.replace('/admin-accountmanage');
       },
-      async postAccount(){
-        const response = await axios.post('/account/', {
-        ...this.accountInfo
+      async getAccount(){
+        const response = await axios.get('/account/'+ this.accountInfo.email)
+        this.accountInfo.email = response.data.email
+        this.accountInfo.advisor = response.data.advisor
+      },
+      async patchAccount(){
+        const response = await axios.patch('/account/'+ this.accountInfo.email, {
+            ...this.accountInfo
         })
         console.log(response);
-        if(response?.status == 201){
+        if(response?.status == 200){
           this.$router.replace('/admin-accountmanage');
         }
       }
@@ -76,8 +84,8 @@ import axios from '../../utils/axios';
             <button class="mt-10 text-lg border border-black w-20 h-10 rounded-lg mb-4 mx-3 py-2" @click="closeAlert">
               取消
             </button>
-            <button class="mt-10 text-lg  bg-[#41414E] text-white w-20 h-10 rounded-lg mb-4 py-2" @click="postAccount">
-              新增
+            <button class="mt-10 text-lg  bg-[#41414E] text-white w-20 h-10 rounded-lg mb-4 py-2" @click="patchAccount">
+              儲存
             </button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 <script>
 import BlackButton from '@/components/BlackButton.vue';
 import TextField from '../components/TextField.vue'
+import axios from '../utils/axios';
 export default{
   components: {
     TextField,
@@ -19,6 +20,21 @@ export default{
     };
   },
   methods: {
+    async getVerifyCode(){
+      const response = await axios.post('/auth/forgot-password', {
+        email:this.registerUser.email
+      })
+      console.log(response);
+      if(response?.status == 200){
+        alert("驗證碼已寄出");
+      }
+      else if(response?.status == 429){
+        alert("請稍後再試");
+      }
+      else if(response?.status == 500){
+        alert("未填入信箱");
+      }
+    }
   },
 }
 </script>
@@ -43,7 +59,7 @@ export default{
                     <div class=" w-9/12">
                         <TextField textType="Email帳號" class="mt-4 " v-model="registerUser.email" />
                         <div class="flex flex-col items-center mt-4">
-                            <a class="mb-3">獲取驗證碼</a>
+                            <a class="mb-3 underline text-[#440CC6] cursor-pointer" @click="getVerifyCode">獲取驗證碼</a>
                             <img src="@/assets/Line.png" class="w-full">
                         </div>
                         <TextField textType="驗證碼" class="mt-4" v-model="registerUser.name" />

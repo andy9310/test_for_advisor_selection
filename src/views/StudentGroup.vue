@@ -65,8 +65,10 @@ export default{
       date,students
     }
   },
+    created(){
+        this.currentteam = this.$route.params.team
+    },
   mounted(){
-    this.created();
   },
   data() {
     return {
@@ -82,7 +84,7 @@ export default{
         parameter:{
             semester_year:'114'
         },
-        currentteam: '甲組',
+        currentteam: '',
     };
   },
   methods: {
@@ -92,9 +94,7 @@ export default{
     toggleOpen(){
         this.openList = !this.openList
     },
-    created(){
-        this.currentteam = this.$route.params.team
-    },
+    
     OpenMenu(info){
         this.students.forEach(element => {
             element.groupInfo.forEach( info=>{
@@ -189,7 +189,7 @@ export default{
                         <div class="flex flex-row justify-between border-b border-slate-300">
                             <h1 class="font-bold text-lg">考生名單</h1>
                             <div class="underline flex flex-row items-center">
-                                <router-link :to="`/alert-fillexaminee/${currentteam}/${group}`">
+                                <router-link :to="`/alert-fillexaminee/${currentteam}/${student.groupName}`">
                                     <button class="underline">匯入考生名單</button>
                                 </router-link>
                                 <img src="@/assets/chevron-down.png" v-if="openList==false" class=" w-4 h-4 cursor-pointer" @click="toggleOpen">

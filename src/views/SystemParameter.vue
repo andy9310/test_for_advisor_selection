@@ -1,30 +1,59 @@
 <script >
 import BlackButton from '@/components/BlackButton.vue';
 import PlainTextField from '../components/PlainTextField.vue';
+import NavBar from '../components/NavBar.vue';
+import axios from '../utils/axios';
 export default{
   components: {
     PlainTextField,
     BlackButton,
+    NavBar,
   },
   data() {
     return {
-      loginUser:{
+        siteInfo:{
+            semesterYear: "113",
+            officialAccount: "",
+            primaryUndertaker: "",
+            primaryUndertakerJobTitle: "",
+            primaryUndertakerEmail: "",
+            secondaryUndertaker: "",
+            secondaryUndertakerJobTitle: "",
+            secondaryUndertakerEmail: ""
+        },
+        loginUser:{
         name:'管理員',
-      },
-      time:{
+        },
+        time:{
         start:'2024/11/01 09:00起',
         end:'2024/11/14 17:00迄',
-      },
-      parameter:{
-        semester_year:'114'
-      },
-      tabs: ['甲組','乙組','丙組'],
-      currenttab: '甲組',
-      advisors:['王以安','楊凱駿','楊鈞安'],
-      groups:['甄試正取生','甄試備取生'],
+        },
+        parameter:{
+            semester_year:'114'
+        },
+        tabs: ['甲組','乙組','丙組'],
+        currenttab: '甲組',
+        advisors:['王以安','楊凱駿','楊鈞安'],
+        groups:['甄試正取生','甄試備取生'],
     };
   },
+  mounted(){
+    this.getSiteInfo();
+  },
   methods: {
+    async getSiteInfo(){
+        const response = await axios.get('/siteInfo/'+ this.siteInfo.semesterYear)
+        this.siteInfo = response.data
+    },
+    async patchSiteInfo(){
+        const response = await axios.patch('/siteInfo/'+ this.siteInfo.semesterYear, {
+            ...this.siteInfo
+        })
+        console.log(response);
+        if(response?.status == 200){
+          alert('儲存成功');
+        }
+    },
   },
 }
 </script>
@@ -37,14 +66,7 @@ export default{
         <img src="@/assets/C.png" class=" absolute bottom-52 right-1 w-28 h-28 z-40">
         <img src="@/assets/E.png" class=" absolute bottom-1 left-25rem w-28 h-28 z-40">
         
-        <div class=" flex flex-row justify-between pt-8 ml-16">
-            <h1 class="text-2xl font-bold pl-10">臺大電信所指導教授填選系統</h1>
-            <div class="flex flex-row items-center pr-16">
-                <h1 class="mx-1">{{loginUser.name}}您好</h1>
-                <h1 class="text-xl font-bold mx-1 pb-1">|</h1>
-                <router-link to="/login"><img src="@/assets/logout.png" class="w-6 h-6 mx-1"></router-link>
-            </div>
-        </div>
+        <NavBar/>
 
         <div class="flex flex-row justify-around h-full">
             <div class="flex flex-col ml-16 mt-10">
@@ -83,45 +105,45 @@ export default{
                     <div class="flex flex-col pl-32 pb-10 border-b border-slate-300">
                         <div class="flex flex-row items-center my-3 pl-4">
                             <h2 class="mr-7">學年度:</h2>
-                            <PlainTextField length="w-short" v-model="parameter.semester_year" />
+                            <PlainTextField length="w-short" v-model="siteInfo.semesterYear" />
                         </div>
                         <div class="flex flex-row items-center my-3">
                             <h2 class="mr-7">公務帳號:</h2>
-                            <PlainTextField length="w-long" v-model="parameter.semester_year" />
+                            <PlainTextField length="w-long" v-model="siteInfo.officialAccount" />
                         </div>
                         <div class="flex flex-row items-center my-3 pl-4">
                             <h2 class="mr-7">主承辦:</h2>
                             <div class="flex flex-row items-center">
                                 <h2 class="mr-3">姓名</h2>
-                                <PlainTextField length="w-short" v-model="parameter.semester_year" />
+                                <PlainTextField length="w-short" v-model="siteInfo.primaryUndertaker" />
                             </div>
                             <div class=" flex flex-row ml-7 items-center">
                                 <h2 class="mr-3">職稱</h2>
-                                <PlainTextField length="w-short" v-model="parameter.semester_year" />
+                                <PlainTextField length="w-short" v-model="siteInfo.primaryUndertakerJobTitle" />
                             </div>
                             <div class=" flex flex-row ml-7 items-center">
                                 <h2 class="mr-3">Email</h2>
-                                <PlainTextField length="w-long" v-model="parameter.semester_year" />
+                                <PlainTextField length="w-long" v-model="siteInfo.primaryUndertakerEmail" />
                             </div>
                         </div>
                         <div class="flex flex-row items-center my-3 pl-4">
                             <h2 class="mr-7">次承辦:</h2>
                             <div class="flex flex-row items-center">
                                 <h2 class="mr-3">姓名</h2>
-                                <PlainTextField length="w-short" v-model="parameter.semester_year" />
+                                <PlainTextField length="w-short" v-model="siteInfo.secondaryUndertaker" />
                             </div>
                             <div class=" flex flex-row ml-7 items-center">
                                 <h2 class="mr-3">職稱</h2>
-                                <PlainTextField length="w-short" v-model="parameter.semester_year" />
+                                <PlainTextField length="w-short" v-model="siteInfo.secondaryUndertakerJobTitle" />
                             </div>
                             <div class=" flex flex-row ml-7 items-center">
                                 <h2 class="mr-3">Email</h2>
-                                <PlainTextField length="w-long" v-model="parameter.semester_year" />
+                                <PlainTextField length="w-long" v-model="siteInfo.secondaryUndertakerEmail" />
                             </div>
                         </div>
                     </div>
                     <div class="flex justify-end">
-                        <BlackButton buttonType="儲存" length="w-button-short"></BlackButton>
+                        <BlackButton buttonType="儲存" length="w-button-short" @toggle="patchSiteInfo"></BlackButton>
                     </div>
                 </div>
                 <div class="mx-6 flex flex-col mb-10">

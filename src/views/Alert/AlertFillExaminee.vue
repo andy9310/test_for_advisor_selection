@@ -32,8 +32,7 @@ import BlackButton from '@/components/BlackButton.vue';
             <h1 class="font-bold text-lg">匯入考生名單</h1>
             <button class="text-lg" @click="closeAlert">&times;</button>
           </div>
-          <div class="my-5 flex flex-col mx-8 border border-slate-300 h-40 rounded-lg">
-          </div>
+          <input type="text" class="my-5 mx-8 border border-slate-300 h-40 rounded-lg" />
           <div class="flex flex-row justify-end">
             <button class=" w-button-short my-10 bg-white rounded-xl border border-current mx-4">
                 <h1 class="text-black py-2">取消</h1>

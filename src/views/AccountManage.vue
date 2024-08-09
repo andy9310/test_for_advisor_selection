@@ -2,37 +2,41 @@
 import PlainTextField from '../components/PlainTextField.vue';
 import TeamChip from '../components/TeamChip.vue';
 import NavBar from '../components/NavBar.vue';
+import SearchInput from '../components/SearchInput.vue';
+import axios from '../utils/axios';
 export default{
   components: {
     PlainTextField,
     TeamChip,
     NavBar,
+    SearchInput,
   },
   data() {
     return {
-      loginUser:{
-        name:'管理員',
-      },
-      time:{
-        start:'2024/11/01 09:00起',
-        end:'2024/11/14 17:00迄',
-      },
-      parameter:{
-        semester_year:'114'
-      },
-      advisors:[
-        {name:'王以安',mail:'123@gmail.com',teams:['甲組','乙組'],type:'local'},
-        {name:'楊凱駿',mail:'456@gmail.com',teams:['乙組'],type:'cc'},
-        {name:'楊鈞安',mail:'789@gmail.com',teams:['甲組'],type:'cc'}
-        ],
-        students:[
-        {name:'王小名',mail:'123@gmail.com',teams:['甲組'],group:'甄試備取生',number:'L123456',phone:'0975647589'},
-        {name:'楊小名',mail:'456@gmail.com',teams:['乙組'],group:'甄試備取生',number:'L787687',phone:'0921803680'},
-        {name:'楊小明',mail:'789@gmail.com',teams:['甲組'],group:'考試備取生',number:'L998388',phone:'0977876545'}
-        ]
+        advisors:[],
+        students:[],
+        time:{
+            start:'2024/11/01 09:00起',
+            end:'2024/11/14 17:00迄',
+        },
     };
   },
+  mounted(){
+    this.getAllAccount();
+  },
   methods: {
+    async getAllAccount(){
+        const response_advisor = await axios.get('/account/',{params:{type:'advisor'}})
+        this.advisors = response_advisor.data.filter(account=>account.advisor!==undefined)
+        const response_student = await axios.get('/account/',{params:{type:'student'}})
+        this.students = response_student.data.filter(account=>account.student!==undefined)
+    },
+    async getAdvisorAccount(){
+        const response = await axios.post('/account/fetch-advisor')
+        if(response.status===200){
+            location.reload();
+        }
+    }
   },
 }
 </script>
@@ -44,15 +48,6 @@ export default{
         <img src="@/assets/I.png" class=" absolute top-96 w-12 h-28 z-40">
         <img src="@/assets/C.png" class=" absolute bottom-52 right-1 w-28 h-28 z-40">
         <img src="@/assets/E.png" class=" absolute bottom-1 left-25rem w-28 h-28 z-40">
-        
-        <!-- <div class=" flex flex-row justify-between pt-8 ml-16">
-            <h1 class="text-2xl font-bold pl-10">臺大電信所指導教授填選系統</h1>
-            <div class="flex flex-row items-center pr-16">
-                <h1 class="mx-1">{{loginUser.name}}您好</h1>
-                <h1 class="text-xl font-bold mx-1 pb-1">|</h1>
-                <router-link to="/login"><img src="@/assets/logout.png" class="w-6 h-6 mx-1"></router-link>
-            </div>
-        </div> -->
         <NavBar/>
 
         <div class="flex flex-row justify-around h-full">
@@ -88,11 +83,11 @@ export default{
                     <div class="flex flex-row justify-between">
                         <h1 class="text-2xl font-extrabold">教授帳號</h1>
                         <div class="flex flex-row items-center">
-                            <p class="underline mx-3 text-[#513AA6]">從大量寄信系統下載教授帳號</p>
+                            <p class="underline mx-3 text-[#513AA6] cursor-pointer " @click="getAdvisorAccount()">從大量寄信系統下載教授帳號</p>
                             <router-link :to="`/alert-admin-addadvisor`">
                                 <p class="underline mx-3 text-[#513AA6]">新增帳號</p>
                             </router-link>
-                            <PlainTextField length="w-short" />
+                            <SearchInput length="w-middle" />
                         </div>
                     </div>
                     <div class="border rounded-lg flex flex-col mb-20 my-5">
@@ -103,17 +98,25 @@ export default{
                             <h1 class="my-3 pl-10 w-72 text-start">帳號類型</h1>
                         </div>
                         <div v-for="advisor in advisors" :key="advisor" class="flex flex-row my-3">
-                            <h1 class="my-3 pl-10 w-72 text-start">{{ advisor.name }}</h1>
-                            <h1 class="my-3 pl-10 w-96 text-start">{{ advisor.mail }}</h1>
+                            <h1 class="my-3 pl-10 w-72 text-start">{{ advisor.advisor.name }}</h1>
+                            <h1 class="my-3 pl-10 w-96 text-start">{{ advisor.email }}</h1>
                             <div  class="my-3 pl-10 w-72 flex flex-row items-start">
-                                <TeamChip v-for="team in advisor.teams" :key="team" :buttonType="team"/>
+                                <TeamChip v-if="advisor.advisor.A===true" :buttonType="'甲組'"/>
+                                <TeamChip v-if="advisor.advisor.B===true" :buttonType="'乙組'"/>
+                                <TeamChip v-if="advisor.advisor.C===true" :buttonType="'丙組'"/>
                             </div>
-                            <h1 v-if="advisor.type=='local'" class="my-3 pl-10 pt-3 w-40 items-center">本地帳號</h1>
-                            <h1 v-if="advisor.type=='cc'" class="my-3 pl-10 pt-3 w-40 text-start">計中帳號</h1>
+                            <h1 v-if="advisor.advisor.accountType!=='ccAcount'" class="my-3 pl-10 pt-3 w-40 items-center">本地帳號</h1>
+                            <h1 v-if="advisor.advisor.accountType ==='ccAcount'" class="my-3 pl-10 pt-3 w-40 text-start">計中帳號</h1>
                             <div class="flex flex-row justify-between items-center">
-                                <img src="@/assets/edit.png" class="w-5 h-5 mr-3">
-                                <img src="@/assets/password.png" class="w-5 h-5 mr-3">
-                                <img src="@/assets/trash.png" class="w-5 h-5 mr-3">
+                                <router-link :to="`/alert-admin-reviseadvisor/${advisor.email}`">
+                                    <img src="@/assets/edit.png" class="w-5 h-5 mr-3">
+                                </router-link>
+                                <router-link :to="`/alert-admin-resetpassword/${advisor.email}`">
+                                    <img src="@/assets/password.png" class="w-5 h-5 mr-3">
+                                </router-link>
+                                <router-link :to="`/alert-admin-deleteaccount/${advisor.email}`"> 
+                                    <img src="@/assets/trash.png" class="w-5 h-5 mr-3">
+                                </router-link>
                             </div>
                         </div>
 
