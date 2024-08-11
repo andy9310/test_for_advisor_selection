@@ -31,7 +31,8 @@ export default{
       const response = await axios.post('/auth/register', {
         ...this.user
       })
-      if (response?.status == 200) {
+      console.log(response);
+      if (response?.status == 201) {
         toast.success('註冊成功，5秒後將自動跳轉到登入頁面')
         setTimeout(() => this.$router.push({ path: '/login' }), 5000)
       }
@@ -58,12 +59,12 @@ export default{
                     <h1 class="text-xl font-bold">註冊帳號</h1>
                     <div class=" w-button-longer">
                       <TextField textType="Email帳號" class="mt-5 " v-model="user.email"/>
-                      <TextField textType="學生姓名" class="mt-5" v-model="user.name" />
-                      <TextField textType="准考證號" class="mt-5 " v-model="user.examineeNumber" />
-                      <TextField textType="行動電話" class="mt-5 " v-model="user.phoneNumber" />
+                      <TextField textType="學生姓名" class="mt-5" v-model="user.student.name" />
+                      <TextField textType="准考證號" class="mt-5 " v-model="user.student.examineeNumber" />
+                      <TextField textType="行動電話" class="mt-5 " v-model="user.student.phoneNumber" />
                       <TextField textType="密碼" class="mt-5 " v-model="user.password"/>
                       <TextField textType="確認密碼" class="mt-5 " v-model="confirmPassword" />
-                      <BlackButton buttonType="註冊" length="w-button-longer" @toggle-register="postRegister"/>
+                      <BlackButton buttonType="註冊" length="w-button-longer" @toggle="postRegister"/>
                     </div>
                 </div>
             </div>

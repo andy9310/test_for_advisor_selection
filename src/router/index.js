@@ -35,7 +35,7 @@ const router = createRouter({
       component: () => import('../views/Alert/AlertDeleteGroup.vue'),
     },
     {
-      path: '/alert-patchgroup/:group',
+      path: '/alert-patchgroup/:team/:type',
       name: 'AlertPatchGroup',
       component: () => import('../views/Alert/AlertPatchGroup.vue'),
     },
