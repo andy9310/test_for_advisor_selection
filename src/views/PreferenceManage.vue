@@ -2,45 +2,52 @@
 import BlackButton from '@/components/BlackButton.vue';
 import PlainTextField from '../components/PlainTextField.vue';
 import SelectStatus from '@/components/SelectStatus.vue';
+import NavBar from '../components/NavBar.vue';
+import axios from '../utils/axios';
 export default{
-  components: {
-    PlainTextField,
-    BlackButton,
-    SelectStatus,
-  },
-  data() {
-    return {
-        loginUser:{
-        name:'管理員',
-        },
-        time:{
-        start:'2024/11/01 09:00起',
-        end:'2024/11/14 17:00迄',
-        },
-        parameter:{
-        semester_year:'114'
-        },
-        tabs: ['甲組','乙組','丙組'],
-        currenttab: '甲組',
-        advisors:['王以安','楊凱駿','楊鈞安'],
-        groups:['甄試正取生','甄試備取生'],
-        students:[
-            {
-                name:'甄試正取生',
-                student:'學生A'
+    components: {
+        PlainTextField,
+        BlackButton,
+        SelectStatus,
+        NavBar,
+    },
+    data() {
+        return {
+            time:{
+                start:'2024/11/01 09:00起',
+                end:'2024/11/14 17:00迄',
             },
-            {
-                name:'甄試備取生',
-                student:'學生B'
+            parameter:{
+                semester_year:'114'
             },
-        ],
-        professors:['教授A','教授B','教授C'],
-        status:'等待同意'
+            tabs: ['甲組','乙組','丙組'],
+            currenttab: '甲組',
+            advisors:['王以安','楊凱駿','楊鈞安'],
+            groups:[],
+            students:[
+                {
+                    name:'甄試正取生',
+                    student:'學生A'
+                },
+                {
+                    name:'甄試備取生',
+                    student:'學生B'
+                },
+            ],
+            professors:['教授A','教授B','教授C'],
+            status:'等待同意'
 
-    };
-  },
-  methods: {
-  },
+        };
+    },
+    mounted(){
+        this.getGroups();
+    },
+    methods: {
+        async getGroups(){
+            const response = await axios.get('/student-group/')
+            this.groups = response.data
+        }
+    },
 }
 </script>
 
@@ -51,15 +58,7 @@ export default{
         <img src="@/assets/I.png" class=" absolute top-96 w-12 h-28 z-40">
         <img src="@/assets/C.png" class=" absolute bottom-52 right-1 w-28 h-28 z-40">
         <img src="@/assets/E.png" class=" absolute bottom-1 left-25rem w-28 h-28 z-40">
-        
-        <div class=" flex flex-row justify-between pt-8 ml-16">
-            <h1 class="text-2xl font-bold pl-10">臺大電信所指導教授填選系統</h1>
-            <div class="flex flex-row items-center pr-16">
-                <h1 class="mx-1">{{loginUser.name}}您好</h1>
-                <h1 class="text-xl font-bold mx-1 pb-1">|</h1>
-                <router-link to="/login"><img src="@/assets/logout.png" class="w-6 h-6 mx-1"></router-link>
-            </div>
-        </div>
+        <NavBar/>
 
         <div class="flex flex-row justify-around h-full">
             <div class="flex flex-col ml-16 mt-10">
@@ -116,9 +115,9 @@ export default{
                             </div>
                         </div>
                         
-                        <div  v-for="group in groups" :key="group" class="flex flex-col my-5">
+                        <div  v-for="group in groups.filter(group=>group.teamType===currenttab)" :key="group" class="flex flex-col my-5">
                             <div class="flex flex-row my-5 justify-between">
-                                <h1 class="font-bold text-xl mb-5">{{ group }}</h1>
+                                <h1 class="font-bold text-xl mb-5">{{ group.groupName }}</h1>
                                 <PlainTextField/>
                             </div>
                             <div class="flex flex-col border border-slate-300 rounded-xl">
@@ -128,22 +127,22 @@ export default{
                                     <h1 class="w-96">教師同意狀態</h1>
                                     <h1 class="w-96">分發結果</h1>
                                 </div>
-                                <div v-for="student_group in students" :key="student_group" class="flex flex-col">
-                                    <div v-if="group===student_group.name" class="flex flex-col">
-                                        <div v-for="professor in professors" :key="professor" class="flex flex-row my-5 items-center">
-                                            <h1 class="w-96 mx-5" v-if="professor===professors[0]">{{student_group.student}}</h1>
-                                            <h1 class="w-96 mx-5" v-if="professor!==professors[0]"></h1>
-                                            <h1 class="w-60">{{ professor }}</h1>
-                                            <div class="w-96 flex flex-row items-center">
-                                                <SelectStatus :multistatus="['等待同意','已同意','被拒絕']" v-model="status"></SelectStatus>
-                                                <p v-if="professor===professors[0]" class=" text-[#513AA6] ml-20 underline">解除鎖定</p>
-                                            </div>
-                                            <SelectStatus v-if="professor===professors[0]" :multistatus="['等待同意','已同意','被拒絕']" v-model="status"></SelectStatus>
-
+                                <!-- <div v-for="student_group in students" :key="student_group" class="flex flex-col"> -->
+                                <div v-for="(examinee,index) in group.examinees" :key="index" class="flex flex-col">
+                                    <div v-for="professor in professors" :key="professor" class="flex flex-row my-5 items-center">
+                                        <h1 class="w-96 mx-5" v-if="professor===professors[0]">{{examinee.name}}</h1>
+                                        <h1 class="w-96 mx-5" v-if="professor!==professors[0]"></h1>
+                                        <h1 class="w-60">{{ professor }}</h1>
+                                        <div class="w-96 flex flex-row items-center">
+                                            <SelectStatus :multistatus="['等待同意','已同意','被拒絕']" v-model="status"></SelectStatus>
+                                            <p v-if="professor===professors[0]" class=" text-[#513AA6] ml-20 underline">解除鎖定</p>
                                         </div>
+                                        <SelectStatus v-if="professor===professors[0]" :multistatus="['等待同意','已同意','被拒絕']" v-model="status"></SelectStatus>
+
                                     </div>
-                                    
                                 </div>
+                                    
+                                <!-- </div> -->
                             </div>
                         </div>
                     
