@@ -1,64 +1,72 @@
 <script >
 import BlackButton from '@/components/BlackButton.vue';
 import TeamChip from '@/components/TeamChip.vue';
+import NavBar from '../components/NavBar.vue';
+import axios from '../utils/axios';
 export default{
   components: {
     BlackButton,
     TeamChip,
+    NavBar,
   },
   data() {
     return {
-        loginUser:{
-        name:'管理員',
-        },
         time:{
-        start:'2024/11/01 09:00起',
-        end:'2024/11/14 17:00迄',
+            start:'2024/11/01 09:00起',
+            end:'2024/11/14 17:00迄',
         },
-        parameter:{
-        semester_year:'114'
-        },
-        tabs: ['甲組','乙組','丙組'],
-        currenttab: '甲組',
-        advisors:['王以安','楊凱駿','楊鈞安'],
-        groups:['甄試正取生','甄試備取生'],
-        professor_student:[
-            {
-                name:'教授A',
-                students:['學生A','學生B','學生C']
-            },
-            {
-                name:'教授B',
-                students:['學生B','學生C']
-            },
-            {
-                name:'教授C',
-                students:['學生A','學生C']
-            },
-        ],
-        professor_record:[
-            {
-                name:'教授A',
-                type:'add',
-                students:['學生D']
-            },
-            {
-                name:'教授B',
-                type:'minus',
-                students:['學生A'],
-            },
-            {
-                name:'教授C',
-                type:'minus',
-                students:['學生C'],
-            },
-        ],
-        professors:['教授A','教授B','教授C'],
-        status:'等待同意'
-
+        tabs: ['A','B','C'],
+        currenttab: 'A',
+        assignments:[],
+        advisors:[],
+        advisorId_assignments:{},
+        changeHistory:{
+            A:[],
+            B:[],
+            C:[],
+        }
     };
   },
+  mounted(){
+    this.getAssignment()
+    this.getChangeHistory()
+  },
   methods: {
+    async getAssignment(){
+        const response = await axios.get('/assignment/')
+        this.assignments = response.data
+        console.log(response.data)
+        this.getAdvisors()
+    },
+    async getAdvisors(){
+        const response = await axios.get('/account/',{params:{type:'advisor'}})
+        response.data.map(async(advisor)=>{
+            const res = await axios.get('/account/'+advisor.email)
+            this.advisors.push(res.data)
+            this.advisorId_assignments[res.data.advisor.id] = this.assignments.filter(assignment=>assignment.advisor.id === res.data.advisor.id)
+        })
+        console.log(this.advisorId_assignments)
+    },
+    async getChangeHistory(){
+        const response = await axios.get('/advisor-change/',{params:{teamType:this.currenttab}})
+        console.log(response)
+        if(this.currenttab === 'A'){
+            this.changeHistory.A = response.data
+        }
+        else if(this.currenttab === 'B'){
+            this.changeHistory.B = response.data
+        }
+        else if(this.currenttab === 'C'){
+            this.changeHistory.C = response.data
+        }
+    },
+    async deleteChangeHistory(id){
+        const response = await axios.delete('/advisor-change/'+id)
+        if(response.status === 200){
+            alert('刪除成功')
+            location.reload();
+        }
+    }
   },
 }
 </script>
@@ -70,15 +78,7 @@ export default{
         <img src="@/assets/I.png" class=" absolute top-96 w-12 h-28 z-40">
         <img src="@/assets/C.png" class=" absolute bottom-52 right-1 w-28 h-28 z-40">
         <img src="@/assets/E.png" class=" absolute bottom-1 left-25rem w-28 h-28 z-40">
-        
-        <div class=" flex flex-row justify-between pt-8 ml-16">
-            <h1 class="text-2xl font-bold pl-10">臺大電信所指導教授填選系統</h1>
-            <div class="flex flex-row items-center pr-16">
-                <h1 class="mx-1">{{loginUser.name}}您好</h1>
-                <h1 class="text-xl font-bold mx-1 pb-1">|</h1>
-                <router-link to="/login"><img src="@/assets/logout.png" class="w-6 h-6 mx-1"></router-link>
-            </div>
-        </div>
+        <NavBar/>
 
         <div class="flex flex-row justify-around h-full">
             <div class="flex flex-col ml-16 mt-10">
@@ -121,7 +121,7 @@ export default{
                                 'border-b w-16 py-2 px-2':currenttab !== tab
                             }" 
                             @click="currenttab = tab"
-                            >{{ tab }}
+                            >{{ tab==='A'?'甲組':tab==='B'?'乙組':'丙組' }}
                         </button>
                         <div class="border-b w-full"></div>
                     </div>
@@ -134,10 +134,34 @@ export default{
                             <h1 class="w-96 mx-5 my-5">教授姓名</h1>
                             <h1 class="w-96 mx-5 my-5">學生姓名</h1>
                         </div>
-                        <div v-for="professor in professors" :key="professor" class="flex flex-row">
-                            <h1 class="w-96 mx-5 my-5">{{ professor }}</h1>
-                            <div class="flex flex-row w-96 mx-5 my-5">
-                                <h1 v-for="student in professor_student.filter(set=>set.name===professor)[0].students" :key="student" >{{ student }} 、 </h1>
+                        <div v-if="currenttab==='A'">
+                            <div v-for="(advisor,index) in advisors.filter(advisor=>advisor.advisor.A===true)" :key="index" class="flex flex-row">
+                                <div v-if="advisorId_assignments[advisor.advisor.id].length!==0" class="flex flex-row">
+                                    <h1 class="w-96 mx-5 my-5">{{ advisor.advisor.name }}</h1>
+                                    <div class="flex flex-row w-96 mx-5 my-5">
+                                        <h1 v-for="(assignment,index) in advisorId_assignments[advisor.advisor.id].filter(assignment=>assignment.student.teamType===currenttab)" :key="index" >{{ assignment.student.name }} 、 </h1>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="currenttab==='B'">
+                            <div v-for="(advisor,index) in advisors.filter(advisor=>advisor.advisor.B===true)" :key="index" class="flex flex-row">
+                                <div v-if="advisorId_assignments[advisor.advisor.id].length!==0" class="flex flex-row">
+                                    <h1 class="w-96 mx-5 my-5">{{ advisor.advisor.name }}</h1>
+                                    <div class="flex flex-row w-96 mx-5 my-5">
+                                        <h1 v-for="(assignment,index) in advisorId_assignments[advisor.advisor.id].filter(assignment=>assignment.student.teamType===currenttab)" :key="index" >{{ assignment.student.name }} 、 </h1>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="currenttab==='C'">
+                            <div v-for="(advisor,index) in advisors.filter(advisor=>advisor.advisor.C===true)" :key="index" class="flex flex-row">
+                                <div v-if="advisorId_assignments[advisor.advisor.id].length!==0" class="flex flex-row">
+                                    <h1 class="w-96 mx-5 my-5">{{ advisor.advisor.name }}</h1>
+                                    <div class="flex flex-row w-96 mx-5 my-5">
+                                        <h1 v-for="(assignment,index) in advisorId_assignments[advisor.advisor.id].filter(assignment=>assignment.student.teamType===currenttab)" :key="index" >{{ assignment.student.name }} 、 </h1>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -153,13 +177,13 @@ export default{
                             <h1 class="w-96 mx-5 my-5">異動類型</h1>
                             <h1 class="w-96 mx-5 my-5">學生姓名</h1>
                         </div>
-                        <div v-for="professor in professors" :key="professor" class="flex flex-row items-center">
-                            <h1 class="w-96 mx-5 my-5">{{ professor }}</h1>
-                            <TeamChip buttonType="乙組" addClass='w-96 mx-5 my-5'/>
-                            <div class="flex flex-row w-96 mx-5 my-5">
-                                <h1 v-for="student in professor_record.filter(set=>set.name===professor)[0].students" :key="student" >{{ student }}</h1>
+                        <div v-if="currenttab==='A'">
+                            <div v-for="(history,index) in changeHistory.A" :key="index" class="flex flex-row items-center">
+                                <h1 class="w-96 mx-5 my-5">{{ history.advisor.name }}</h1>
+                                <TeamChip :buttonType="history.type==='add'?'加收':'減收'" addClass='w-96 mx-5 my-5'/>
+                                <h1 class="flex flex-row w-96 mx-5 my-5">{{ history.student.name }}</h1>
+                                <img src="@/assets/trash.png" class="w-5 h-5 mr-3 cursor-pointer" @click="deleteChangeHistory(history.id)">
                             </div>
-                            <img src="@/assets/trash.png" class="w-5 h-5 mr-3">
                         </div>
                     </div>
                     <div class="flex justify-end">

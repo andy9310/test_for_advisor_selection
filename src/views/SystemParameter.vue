@@ -27,7 +27,14 @@ export default{
         },
         tabs: ['A','B','C'],
         currenttab: 'A',
-        allquota:[],
+        allquota:{ // already post
+            A:[],
+            Agroups:[],
+            B:[],
+            Bgroups:[],
+            C:[],
+            Cgroups:[],
+        }, 
         postquota:[],
         advisors:[],
         groupQuotas:[],
@@ -36,7 +43,6 @@ export default{
   mounted(){
     this.getSiteInfo();
     this.getEnrollmentQuota();
-    this.getAllAdvisor();
     this.getGroupQuota();
   },
   methods: {
@@ -54,75 +60,59 @@ export default{
         }
     },
     async getEnrollmentQuota(){
-        const response = await axios.get('/enrollment-quota/')
-        this.allquota = response.data
-        console.log(response.data);
+        let response = await axios.get('/enrollment-quota/',{params:{teamType:'A'}})
+        this.allquota.A = response.data;
+        response = await axios.get('/enrollment-quota/',{params:{teamType:'B'}})
+        this.allquota.B = response.data;
+        response = await axios.get('/enrollment-quota/',{params:{teamType:'C'}})
+        this.allquota.C = response.data;
+        this.getAllAdvisor(); // run after the array of allquota is finished
+
     },
     async getAllAdvisor(){
         const response = await axios.get('/account/',{params:{type:'advisor'}})
         this.advisors = response.data.filter(account=>account.advisor!==undefined)
+        if(this.allquota.A.length!==0){
+            this.allquota.Agroups = Object.keys( this.allquota.A[0].detail.studentGroup)
+        }
+        if(this.allquota.B.length!==0){
+            this.allquota.Bgroups = Object.keys( this.allquota.B[0].detail.studentGroup)
+        }
+        if(this.allquota.C.length!==0){
+            this.allquota.Cgroups = Object.keys( this.allquota.C[0].detail.studentGroup)
+        }
         for(let i = 0;i < this.advisors.length; i++){
             const res = await axios.get('/account/'+this.advisors[i].email)
             this.advisors[i].id = res.data.advisor.id
-            let check = this.allquota.filter(quota=>quota.advisor.id===this.advisors[i].id).length===0
-            let check_Atype = this.allquota.filter(quota=>quota.advisor.id===this.advisors[i].id && quota.teamType==='A').length===0
-            let check_Btype = this.allquota.filter(quota=>quota.advisor.id===this.advisors[i].id && quota.teamType==='B').length===0
-            let check_Ctype = this.allquota.filter(quota=>quota.advisor.id===this.advisors[i].id && quota.teamType==='C').length===0
-            if(check){
-                if(this.advisors[i].advisor.A===true){
-                    this.postquota.push({
-                        teamType : 'A',
-                        quota: 0,
-                        advisorId: res.data.advisor.id,
-                        name: this.advisors[i].advisor.name
-                    })
-                }
-                if(this.advisors[i].advisor.B===true){
-                    this.postquota.push({
-                        teamType : 'B',
-                        quota: 0,
-                        advisorId: res.data.advisor.id,
-                        name: this.advisors[i].advisor.name
-                    })
-                }
-                if(this.advisors[i].advisor.C===true){
-                    this.postquota.push({
-                        teamType : 'C',
-                        quota: 0,
-                        advisorId: res.data.advisor.id,
-                        name: this.advisors[i].advisor.name
-                    })
-                } 
-            }
-            else{
-                if(check_Atype && this.advisors[i].advisor.A===true){
-                    this.postquota.push({
-                        teamType : 'A',
-                        quota: 0,
-                        advisorId: res.data.advisor.id,
-                        name: this.advisors[i].advisor.name
-                    })
-                }
-                if(check_Btype && this.advisors[i].advisor.B===true){
-                    this.postquota.push({
-                        teamType : 'B',
-                        quota: 0,
-                        advisorId: res.data.advisor.id,
-                        name: this.advisors[i].advisor.name
-                    })
-                }
-                if(check_Ctype && this.advisors[i].advisor.C===true){
-                    this.postquota.push({
-                        teamType : 'C',
-                        quota: 0,
-                        advisorId: res.data.advisor.id,
-                        name: this.advisors[i].advisor.name
-                    })
-                } 
+            
+            if(this.advisors[i].advisor.A===true && this.allquota.A.filter(quota=>quota.advisor.id === this.advisors[i].id).length===0){
+                this.postquota.push({
+                    teamType : 'A',
+                    quota: 0,
+                    advisorId: res.data.advisor.id,
+                    name: this.advisors[i].advisor.name
 
-            }        
+                })
+            }
+            if(this.advisors[i].advisor.B===true && this.allquota.B.filter(quota=>quota.advisor.id === this.advisors[i].id).length===0){
+                this.postquota.push({
+                    teamType : 'B',
+                    quota: 0,
+                    advisorId: res.data.advisor.id,
+                    name: this.advisors[i].advisor.name
+
+                })
+            }
+            if(this.advisors[i].advisor.C===true && this.allquota.C.filter(quota=>quota.advisor.id === this.advisors[i].id).length===0){
+                this.postquota.push({
+                    teamType : 'C',
+                    quota: 0,
+                    advisorId: res.data.advisor.id,
+                    name: this.advisors[i].advisor.name
+
+                })
+            }
         }
-        console.log();
     },
     async postEnrollmentQuota(quota){
         const response = await axios.post('/enrollment-quota/',{
@@ -131,17 +121,12 @@ export default{
             advisorId:quota.advisorId
         })
         console.log(response);
-        if(response.status===201){
-            // alert('儲存新quota')
-        }
     },
     async patchEnrollmentQuota(quota){
         const response = await axios.patch('/enrollment-quota/'+quota.id,{
             quota:parseInt(quota.quota,10),
         })
-        if(response.status===200){
-            // alert('儲存舊quota');
-        }
+        console.log(response);
     },
     async getGroupQuota(){
         const response = await axios.get('/group-quota-limit/')
@@ -153,7 +138,13 @@ export default{
         this.postquota.map((quota)=>{
             this.postEnrollmentQuota(quota)
         })
-        this.allquota.map((quota)=>{
+        this.allquota.A.map((quota)=>{
+            this.patchEnrollmentQuota(quota)
+        })
+        this.allquota.B.map((quota)=>{
+            this.patchEnrollmentQuota(quota)
+        })
+        this.allquota.C.map((quota)=>{
             this.patchEnrollmentQuota(quota)
         })
     }
@@ -278,23 +269,53 @@ export default{
                                 <a class="mx-5 text-[#513AA6] underline">選擇檔案</a>
                             </div>
                             <div class="border rounded-lg flex flex-col mb-20">
-                                <div class="flex flex-row border-b">
-                                    <h1 class="my-3 mx-14">教授姓名</h1>
-                                    <h1 class="my-3 mx-14">114可指導新生人數</h1>
-                                    <h1 class="my-3 mx-14">甄試正取生已同意</h1>
-                                    <h1 class="my-3 mx-14">甄試備取生已同意</h1>
-                                    <h1 class="my-3 mx-14">考試報到生已同意</h1>
-                                    <h1 class="my-3 mx-14">手動調整</h1>
-                                    <h1 class="my-3 mx-14">總共已同意學生數</h1>
+                                <div v-if="currenttab==='A'">
+                                    <div class="flex flex-row border-b">
+                                        <h1 class="my-3 mx-14">教授姓名</h1>
+                                        <h1 class="my-3 mx-14">114可指導新生人數</h1>
+                                        <h1 v-for="(group, index) in allquota.Agroups" :key="index" class="my-3 mx-14">{{group}}</h1>
+                                        <h1 class="my-3 mx-14">手動調整</h1>
+                                        <h1 class="my-3 mx-14">總共已同意學生數</h1>
+                                    </div>
+                                    <div  v-for="(quota, index) in allquota.A" :key="index" class="flex flex-row my-3">
+                                        <h1 class="my-3 mx-14 w-24">{{ quota.advisor.name }}</h1>
+                                        <PlainTextField length="w-short"  :class="'my-3 mx-14'" v-model="quota.quota" />
+                                        <h1 v-for="(group, index) in allquota.Agroups" :key="index" class="my-3 mx-14 w-32 text-center">{{quota.detail.studentGroup[group]}}</h1>
+                                        <h1 class="my-3 mx-14 w-32 text-center">{{ quota.detail.manually }}</h1>
+                                        <h1 class="my-3 mx-14 w-32 text-center">{{ quota.detail.total }}</h1>
+                                    </div>
                                 </div>
-                                <div v-for="(quota, index) in allquota.filter(quota=>quota.teamType===currenttab)" :key="index" class="flex flex-row my-3">
-                                    <h1 class="my-3 mx-14 w-24">{{ quota.advisor.name }}</h1>
-                                    <PlainTextField length="w-short"  :class="'my-3 mx-14'" v-model="quota.quota" />
-                                    <h1 class="my-3 mx-14 w-32 text-center"></h1>
-                                    <h1 class="my-3 mx-14 w-32 text-center"></h1>
-                                    <h1 class="my-3 mx-14 w-32 text-center"></h1>
-                                    <h1 class="my-3 mx-14 w-32 text-center"></h1>
-                                    <h1 class="my-3 mx-14 w-32 text-center"></h1>
+                                <div v-if="currenttab==='B'">
+                                    <div class="flex flex-row border-b">
+                                        <h1 class="my-3 mx-14">教授姓名</h1>
+                                        <h1 class="my-3 mx-14">114可指導新生人數</h1>
+                                        <h1 v-for="(group, index) in allquota.Bgroups" :key="index" class="my-3 mx-14">{{group}}</h1>
+                                        <h1 class="my-3 mx-14">手動調整</h1>
+                                        <h1 class="my-3 mx-14">總共已同意學生數</h1>
+                                    </div>
+                                    <div  v-for="(quota, index) in allquota.B" :key="index" class="flex flex-row my-3">
+                                        <h1 class="my-3 mx-14 w-24">{{ quota.advisor.name }}</h1>
+                                        <PlainTextField length="w-short"  :class="'my-3 mx-14'" v-model="quota.quota" />
+                                        <h1 v-for="(group, index) in allquota.Bgroups" :key="index" class="my-3 mx-14">{{quota.detail.studentGroup[group]}}</h1>
+                                        <h1 class="my-3 mx-14 w-32 text-center">{{ quota.detail.manually }}</h1>
+                                        <h1 class="my-3 mx-14 w-32 text-center">{{ quota.detail.total }}</h1>
+                                    </div>
+                                </div>
+                                <div v-if="currenttab==='C'">
+                                    <div class="flex flex-row border-b">
+                                        <h1 class="my-3 mx-14">教授姓名</h1>
+                                        <h1 class="my-3 mx-14">114可指導新生人數</h1>
+                                        <h1 v-for="(group, index) in allquota.Cgroups" :key="index" class="my-3 mx-14">{{group}}</h1>
+                                        <h1 class="my-3 mx-14">手動調整</h1>
+                                        <h1 class="my-3 mx-14">總共已同意學生數</h1>
+                                    </div>
+                                    <div v-for="(quota, index) in allquota.C" :key="index" class="flex flex-row my-3">
+                                        <h1 class="my-3 mx-14 w-24">{{ quota.advisor.name }}</h1>
+                                        <PlainTextField length="w-short"  :class="'my-3 mx-14'" v-model="quota.quota" />
+                                        <h1 v-for="(group, index) in allquota.Cgroups" :key="index" class="my-3 mx-14 w-32 text-center">{{quota.detail.studentGroup[group]}}</h1>
+                                        <h1 class="my-3 mx-14 w-32 text-center">{{ quota.detail.manually }}</h1>
+                                        <h1 class="my-3 mx-14 w-32 text-center">{{ quota.detail.total }}</h1>
+                                    </div>
                                 </div>
                                 <div v-for="(quota, index) in postquota.filter(quota=>quota.teamType===currenttab)" :key="index" class="flex flex-row my-3">
                                     <h1 class="my-3 mx-14 w-24">{{ quota.name }}</h1>
@@ -318,7 +339,7 @@ export default{
                                     <h1 class="my-3 mx-14">學生群組</h1>
                                     <h1 class="my-3 mx-14">限制名額</h1>
                                 </div>
-                                <div v-for="(quota,index) in groupQuotas" :key="index">
+                                <div v-for="(quota,index) in groupQuotas.filter(quotarule=>quotarule.studentGroups.length!==0)" :key="index">
                                     <div v-for="(group,group_index) in quota.studentGroups.filter(group=>group.teamType===currenttab)" :key="group_index" class="flex flex-row my-3">
                                         <h1 class="my-3 mx-14">{{ group.groupName }}</h1>
                                         <h1 class="my-3 mx-10 w-20 text-center">{{ quota.quota }}</h1>

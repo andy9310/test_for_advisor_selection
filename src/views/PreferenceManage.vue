@@ -17,37 +17,84 @@ export default{
                 start:'2024/11/01 09:00起',
                 end:'2024/11/14 17:00迄',
             },
-            parameter:{
-                semester_year:'114'
-            },
-            tabs: ['甲組','乙組','丙組'],
-            currenttab: '甲組',
-            advisors:['王以安','楊凱駿','楊鈞安'],
+            tabs: ['A','B','C'],
+            currenttab: 'A',
             groups:[],
-            students:[
-                {
-                    name:'甄試正取生',
-                    student:'學生A'
-                },
-                {
-                    name:'甄試備取生',
-                    student:'學生B'
-                },
-            ],
-            professors:['教授A','教授B','教授C'],
-            status:'等待同意'
-
+            rankings:[],
+            studentId_assignment:{},
+            studentId_assignmentId:{},
+            studentId_advisors:{},
         };
     },
     mounted(){
         this.getGroups();
+        this.getPreferenceRanking();
     },
     methods: {
         async getGroups(){
             const response = await axios.get('/student-group/')
             this.groups = response.data
-        }
+            console.log(response.data);
+        },
+        async getPreferenceRanking(){
+            const response = await axios.get('/preference-ranking/')
+            this.rankings = response.data.filter(ranking=>ranking.locked===true)
+            response.data.filter(ranking=>ranking.locked===true).map(async(ranking)=>{
+                let tmp_advisors_name = []
+                ranking.rankings.map((rank)=>{
+                    tmp_advisors_name.push(rank.advisor.name);
+                })
+                this.studentId_advisors[ranking.student.id] = tmp_advisors_name
+                const res = await axios.get('/assignment/')
+                this.studentId_assignment[ranking.student.id] = 
+                    res.data.filter(assignment=>assignment.student.id === ranking.student.id).length===0?''
+                    :res.data.filter(assignment=>assignment.student.id === ranking.student.id)[0].advisor.name
+                this.studentId_assignmentId[ranking.student.id] = 
+                    res.data.filter(assignment=>assignment.student.id === ranking.student.id).length===0?undefined
+                    :res.data.filter(assignment=>assignment.student.id === ranking.student.id)[0].id
+            })
+            console.log(this.rankings);
+        },
+        async unlock(ranking){
+            const response = await axios.patch('/preference-ranking/'+ranking.id,{
+                locked:false
+            })
+            if(response.status===200){
+                alert(`解鎖${ranking.student.name}成功`)
+                location.reload();
+            }
+        },
+        async putPreferenceRanking(ranking,value){
+            let rank_array = []
+            ranking.rankings.map((rank)=>{
+                rank_array.push({
+                    rankingId:rank.id,
+                    status:value
+                })
+            })
+            console.log(rank_array)
+            const response = await axios.put('/preference-ranking/'+ranking.id+'/review-preference',rank_array)
+            console.log(response)
+        },
+        async postAssignment(studentId, value){
+            let ranking_array = this.rankings.filter(ranking=>ranking.student.id===studentId)[0].rankings
+            let tmp_advisor_Id = ranking_array.filter(rank=>rank.advisor.name === value)[0].advisor.id
+            if(this.studentId_assignmentId[studentId]!==undefined){
+                const response = await axios.patch('/assignment/'+this.studentId_assignmentId[studentId],{
+                    advisorId: tmp_advisor_Id,
+                })
+                console.log(response)
+            }
+            else{
+                const response = await axios.post('/assignment/',{
+                    advisorId: tmp_advisor_Id,
+                    studentId: studentId
+                })
+                console.log(response)
+            }
+        },
     },
+    
 }
 </script>
 
@@ -100,14 +147,14 @@ export default{
                                 'border-b w-16 py-2 px-2':currenttab !== tab
                             }" 
                             @click="currenttab = tab"
-                            >{{ tab }}
+                            >{{tab==='A'?'甲組':tab==='B'?'乙組':'丙組'}}
                         </button>
                         <div class="border-b w-full"></div>
                     </div>
                     
                     <div class="flex flex-col border-b border-slate-300">
                         <div class="flex flex-row my-5 justify-between items-center">
-                            <h1 class="font-bold text-xl ">管理{{currenttab}}</h1>
+                            <h1 class="font-bold text-xl ">管理{{currenttab==='A'?'甲組':currenttab==='B'?'乙組':'丙組'}}</h1>
                             <div class="flex flex-row ">
                                 <p class="underline">匯出組務會議Excell檔</p>
                                 <div class="mx-3">|</div>
@@ -121,23 +168,23 @@ export default{
                                 <PlainTextField/>
                             </div>
                             <div class="flex flex-col border border-slate-300 rounded-xl">
-                                <div class="flex flex-row my-5 border-b border-slate-300">
+                                <div class="flex flex-row my-5 ">
                                     <h1 class="w-96 mx-5">學生姓名</h1>
                                     <h1 class="w-60">教師姓名</h1>
                                     <h1 class="w-96">教師同意狀態</h1>
                                     <h1 class="w-96">分發結果</h1>
                                 </div>
-                                <!-- <div v-for="student_group in students" :key="student_group" class="flex flex-col"> -->
-                                <div v-for="(examinee,index) in group.examinees" :key="index" class="flex flex-col">
-                                    <div v-for="professor in professors" :key="professor" class="flex flex-row my-5 items-center">
-                                        <h1 class="w-96 mx-5" v-if="professor===professors[0]">{{examinee.name}}</h1>
-                                        <h1 class="w-96 mx-5" v-if="professor!==professors[0]"></h1>
-                                        <h1 class="w-60">{{ professor }}</h1>
+                                <div v-for="(ranking,index) in rankings.filter(ranking=>ranking.student.teamType===currenttab 
+                                    && group.examinees.filter(examinee=>examinee.examineeNumber===ranking.student.examineeNumber).length!==0)" :key="index" class="flex flex-col border-t-2 border-slate-300">
+                                    <div v-for="(one_rank,i) in ranking.rankings" :key="i" class="flex flex-row my-5 items-center">
+                                        <h1 class="w-96 mx-5" v-if="i===0">{{ranking.student.name}}</h1>
+                                        <h1 class="w-96 mx-5" v-if="i!==0"></h1>
+                                        <h1 class="w-60">{{ one_rank.advisor.name }}</h1>
                                         <div class="w-96 flex flex-row items-center">
-                                            <SelectStatus :multistatus="['等待同意','已同意','被拒絕']" v-model="status"></SelectStatus>
-                                            <p v-if="professor===professors[0]" class=" text-[#513AA6] ml-20 underline">解除鎖定</p>
+                                            <SelectStatus :multistatus="['wait','accept','reject']" v-model="one_rank.status" @toggle="putPreferenceRanking(ranking,$event)"></SelectStatus>
+                                            <p v-if="i===0" class=" text-[#513AA6] ml-20 underline cursor-pointer" @click="unlock(ranking)">解除鎖定</p>
                                         </div>
-                                        <SelectStatus v-if="professor===professors[0]" :multistatus="['等待同意','已同意','被拒絕']" v-model="status"></SelectStatus>
+                                        <SelectStatus v-if="i===0" :multistatus="studentId_advisors[ranking.student.id]" v-model="studentId_assignment[ranking.student.id]" @toggle="postAssignment(ranking.student.id,$event)"></SelectStatus>
 
                                     </div>
                                 </div>

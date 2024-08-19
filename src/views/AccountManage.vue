@@ -105,8 +105,8 @@ export default{
                                 <TeamChip v-if="advisor.advisor.B===true" :buttonType="'乙組'"/>
                                 <TeamChip v-if="advisor.advisor.C===true" :buttonType="'丙組'"/>
                             </div>
-                            <h1 v-if="advisor.advisor.accountType!=='ccAcount'" class="my-3 pl-10 pt-3 w-40 items-center">本地帳號</h1>
-                            <h1 v-if="advisor.advisor.accountType ==='ccAcount'" class="my-3 pl-10 pt-3 w-40 text-start">計中帳號</h1>
+                            <h1 v-if="advisor.advisor.accountType!=='ccAccount'" class="my-3 pl-10 pt-3 w-40 items-center">本地帳號</h1>
+                            <h1 v-if="advisor.advisor.accountType ==='ccAccount'" class="my-3 pl-10 pt-3 w-40 text-start">計中帳號</h1>
                             <div class="flex flex-row justify-between items-center">
                                 <router-link :to="`/alert-admin-reviseadvisor/${advisor.email}`">
                                     <img src="@/assets/edit.png" class="w-5 h-5 mr-3">
@@ -136,23 +136,24 @@ export default{
                             <h1 class="my-3 pl-10 w-48 text-start">准考證號</h1>
                             <h1 class="my-3 pl-10 w-48 text-start">行動電話</h1>
                         </div>
+
                         <div v-for="student in students" :key="student" class="flex flex-row my-3">
-                            <h1 class="my-3 pl-10 w-40 text-start">{{ student.name }}</h1>
-                            <h1 class="my-3 pl-10 w-52 text-start">{{ student.mail }}</h1>
+                            <h1 class="my-3 pl-10 w-40 text-start">{{ student.student.name }}</h1>
+                            <h1 class="my-3 pl-10 w-52 text-start">{{ student.email }}</h1>
                             <div  class="my-3 pl-10 w-48 flex flex-row items-start">
-                                <TeamChip :buttonType="student.teams[0] "/>
+                                <TeamChip :buttonType="student.student.teamType==='A'?'甲組':student.student.teamType==='B'?'乙組':'丙組' "/>
                             </div>
-                            <h1 class="my-3 pl-10 w-48 text-start">{{ student.group }}</h1>
-                            <h1 class="my-3 pl-10 w-48 text-start">{{ student.number }}</h1>
-                            <h1 class="my-3 pl-10 w-48 text-start">{{ student.phone }}</h1>
+                            <h1 class="my-3 pl-10 w-48 text-start"></h1>
+                            <h1 class="my-3 pl-10 w-48 text-start">{{ student.student.examineeNumber }}</h1>
+                            <h1 class="my-3 pl-10 w-48 text-start">{{ student.student.phoneNumber }}</h1>
                             <div class="flex flex-row justify-between items-start mt-3">
-                                <router-link :to="`/alert-admin-revisestudentaccount/${student.name}`"> 
+                                <router-link :to="`/alert-admin-revisestudentaccount/${student.student.id}`"> 
                                     <img src="@/assets/edit.png" class="w-5 h-5 mr-3">
                                 </router-link>
-                                <router-link :to="`/alert-admin-resetpassword/${student.name}`"> 
+                                <router-link :to="`/alert-admin-resetpassword/${student.email}`"> 
                                     <img src="@/assets/password.png" class="w-5 h-5 mr-3">
                                 </router-link>
-                                <router-link :to="`/alert-admin-deleteaccount/${student.name}`"> 
+                                <router-link :to="`/alert-admin-deleteaccount/${student.email}`"> 
                                     <img src="@/assets/trash.png" class="w-5 h-5 mr-3">
                                 </router-link>
                             </div>

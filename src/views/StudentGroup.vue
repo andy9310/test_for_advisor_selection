@@ -24,7 +24,6 @@ export default{
                 semester_year:'114'
             },
             currentteam: '',
-            examinees:[],
             studentGroups:[],
             editGroup:[],
             openGroupList:[]
@@ -44,7 +43,7 @@ export default{
             const response = await axios.get('/student-group/')
             let type = this.currentteam==='甲組'?'A':(this.currentteam==='乙組'?'B':'C')
             this.studentGroups = response.data.filter(group=>group.teamType===type)
-            console.log(this.studentGroups)
+            
             for(let i = 0; i<this.studentGroups.length;i++){
                 this.studentGroups[i].openAt = [this.studentGroups[i].openAt, this.studentGroups[i].closeAt]
                 for(let j = 0; j< this.studentGroups[i].examinees.length;j++){
@@ -53,6 +52,7 @@ export default{
                 this.editGroup.push(false)
                 this.openGroupList.push(false)
             }
+            console.log(this.studentGroups)
         },
         async postGroups(index){
             this.studentGroups[index].closeAt = this.studentGroups[index].openAt[1]
@@ -84,7 +84,6 @@ export default{
                 enabledAdvisorQuotaCheck: this.studentGroups[index].enabledAdvisorQuotaCheck,
                 openAt: this.studentGroups[index].openAt,
                 closeAt: this.studentGroups[index].closeAt,
-                examinees: this.examinees,
             })
             console.log(response);
             if(response.status===200){
@@ -92,7 +91,7 @@ export default{
                 this.studentGroups[index].openAt = [this.studentGroups[index].openAt, this.studentGroups[index].closeAt]
             }
         },
-        addGroup(){
+        async addGroup(){
             this.studentGroups.push(
                 {
                     groupName:'',
@@ -106,6 +105,21 @@ export default{
                 },
             );
             this.editGroup.push(false);
+            await axios.post('/student-group/',{
+                groupName:'',
+                teamType:this.currentteam==='甲組'?'A':(this.currentteam==='乙組'?'B':'C'),
+                preferenceQuantity: 0,
+                requiredAdvisorApproval:false,
+                enabledAdvisorQuotaCheck:false,
+                openAt:new Date(),
+                closeAt:new Date(new Date().setDate(new Date().getDate() + 7)),
+                examinees:[],
+            })
+            location.reload();
+        },
+        async deleteGroups(){
+            const response = await axios.delete('/student-group/')
+            console.log(response);
         },
     },
 }
@@ -153,11 +167,11 @@ export default{
                         <h1 class="text-xl font-extrabold">編輯{{currentteam}}學生群組</h1>
                         <p class="underline cursor-pointer" @click="addGroup">新增群組</p>
                     </div>
-                    <div class="flex flex-col pl-10 pt-8 justify-center" v-for="(group,index) in studentGroups" :key="group" >
+                    <div class="flex flex-col pl-10 pt-8 justify-center" v-for="(group,gindex) in studentGroups" :key="group" >
                         <div class="flex flex-row items-center">
-                            <PlainTextField v-if="editGroup[index]===true" length="w-short"  :class="'mx-3'" v-model="group.groupName"/>
-                            <h1 v-if="editGroup[index]===false" class="text-xl font-bold">{{ group.groupName }}</h1>
-                            <img src="@/assets/edit.png" class="w-5 h-5 ml-3 cursor-pointer" @click="editGroup[index]=!editGroup[index]">
+                            <PlainTextField v-if="editGroup[gindex]===true" length="w-short"  :class="'mx-3'" v-model="group.groupName"/>
+                            <h1 v-if="editGroup[gindex]===false" class="text-xl font-bold">{{ group.groupName }}</h1>
+                            <img src="@/assets/edit.png" class="w-5 h-5 ml-3 cursor-pointer" @click="editGroup[gindex]=!editGroup[gindex]">
                         </div>
                         <div class="flex flex-row items-center my-3" >
                             <h1 class="w-40 flex flex-row text-end justify-end items-center">志願序數量<img src="@/assets/info.png" class="w-4 h-4">:</h1> 
@@ -185,14 +199,14 @@ export default{
                         <div class="flex flex-row justify-between border-b border-slate-300">
                             <h1 class="font-bold text-lg">考生名單</h1>
                             <div class="underline flex flex-row items-center">
-                                <router-link :to="`/alert-fillexaminee/${currentteam}/${group.groupName}`">
+                                <router-link :to="`/alert-fillexaminee/${currentteam}/${group.id}`">
                                     <button class="underline">匯入考生名單</button>
                                 </router-link>
-                                <img src="@/assets/chevron-down.png" v-if="openGroupList[index]===false" class=" w-4 h-4 cursor-pointer" @click="()=>{openGroupList[index]=!openGroupList[index]}">
-                                <img src="@/assets/chevron-up.png" v-if="openGroupList[index]===true" class=" w-4 h-4 cursor-pointer" @click="()=>{openGroupList[index]=!openGroupList[index]}">
+                                <img src="@/assets/chevron-down.png" v-if="openGroupList[gindex]===false" class=" w-4 h-4 cursor-pointer" @click="()=>{openGroupList[gindex]=!openGroupList[gindex]}">
+                                <img src="@/assets/chevron-up.png" v-if="openGroupList[gindex]===true" class=" w-4 h-4 cursor-pointer" @click="()=>{openGroupList[gindex]=!openGroupList[gindex]}">
                             </div>
                         </div>
-                        <div v-if="openGroupList[index]===true" class="flex flex-col rounded-lg  border border-slate-300 mt-5">
+                        <div v-if="openGroupList[gindex]===true" class="flex flex-col rounded-lg  border border-slate-300 mt-5">
                             <div class="flex flex-row border-b border-slate-300 w-full">
                                 <h1 class="w-56 my-5 mx-7  text-center">入學方式</h1>
                                 <h1 class="w-56 my-5 mx-7 text-center">名次</h1>
@@ -206,42 +220,50 @@ export default{
                                     :forceFallback="true"
                                     :fallbackOnBody="true"
                                     fallbackClass="fallback" >
-                                <template #item="{element: info}" >
+                                <template #item="{index}" >
                                     
-                                    <div class="flex flex-row w-full relative border-b border-slate-300" @contextmenu.prevent="OpenMenu(info,index)" @click="info.click=false">
-                                        <div v-if="info.click==true" class="z-50 rounded-lg h-48 w-48 border bg-white absolute top-10 right-40 flex flex-col">
-                                            <div class="flex flex-row justify-start mt-4 mb-2">
-                                                <div class="w-12 justify-end flex flex-row">
-                                                    <img src="@/assets/edit.png" class="h-5 w-5 cursor-pointer">
-                                                </div>
-                                                <h1 class="ml-2">編輯考生</h1>
+                                    <div class="flex flex-row w-full relative border-b border-slate-300" @contextmenu.prevent="OpenMenu(group.examinees[index],gindex)" @click="group.examinees[index].click=false">
+                                        <div v-if="group.examinees[index].click==true" class="z-50 rounded-lg h-48 w-48 border bg-white absolute top-10 right-40 flex flex-col">
+                                            <div>
+                                                <router-link :to="`/alert-patchexaminee/${currentteam}/${group.id}/${group.examinees[index].id}`" class="flex flex-row justify-start mt-4 mb-2">
+                                                    <div class="w-12 justify-end flex flex-row">
+                                                        <img src="@/assets/edit.png" class="h-5 w-5 cursor-pointer">
+                                                    </div>
+                                                    <h1 class="ml-2">編輯考生</h1>
+                                                </router-link>
                                             </div>
-                                            <div class="flex flex-row justify-start mt-4 mb-2">
-                                                <div class="w-12 justify-end flex flex-row">
-                                                    <img src="@/assets/arrow-up.png" class="h-5 w-5 cursor-pointer">
-                                                </div>
-                                                <h1 class="ml-2">在上方新增考生</h1>
+                                            <div>
+                                                <router-link :to="`/alert-addexaminee/${currentteam}/${group.id}/${index-1}`" class="flex flex-row justify-start mt-4 mb-2">
+                                                    <div class="w-12 justify-end flex flex-row">
+                                                        <img src="@/assets/arrow-up.png" class="h-5 w-5 cursor-pointer">
+                                                    </div>
+                                                    <h1 class="ml-2">在上方新增考生</h1>
+                                                </router-link>
                                             </div>
-                                            <div class="flex flex-row justify-start mt-4 mb-2">
-                                                <div class="w-12 justify-end flex flex-row">
-                                                    <img src="@/assets/arrow-down.png" class="h-5 w-5 cursor-pointer">
-                                                </div>
-                                                <h1 class="ml-2">在下方新增考生</h1>
+                                            <div>
+                                                <router-link :to="`/alert-addexaminee/${currentteam}/${group.id}/${index+1}`" class="flex flex-row justify-start mt-4 mb-2">
+                                                    <div class="w-12 justify-end flex flex-row">
+                                                        <img src="@/assets/arrow-down.png" class="h-5 w-5 cursor-pointer">
+                                                    </div>
+                                                    <h1 class="ml-2">在下方新增考生</h1>
+                                                </router-link>
                                             </div>
-                                            <div class="flex flex-row justify-start mt-4 mb-2">
-                                                <div class="w-12 justify-end flex flex-row">
-                                                    <img src="@/assets/red_trash.png" class="h-5 w-5 cursor-pointer">
-                                                </div>
-                                                <h1 class="ml-2">刪除</h1>
+                                            <div>
+                                                <router-link :to="`/alert-deleteexaminee/${group.examinees[index].id}/${currentteam}`" class="flex flex-row justify-start mt-4 mb-2">
+                                                    <div class="w-12 justify-end flex flex-row">
+                                                        <img src="@/assets/red_trash.png" class="h-5 w-5 cursor-pointer">
+                                                    </div>
+                                                    <h1 class="ml-2">刪除</h1>
+                                                </router-link>
                                             </div>
                                         </div>
                                         <div class="w-56 my-5 mx-7  items-center justify-center flex flex-row">
                                             <img src="@/assets/drag.png" class=" cursor-pointer">
-                                            <h1>{{info.admission}}</h1>
+                                            <h1>{{group.examinees[index].admission}}</h1>
                                         </div>
-                                        <h1 class="w-56 my-5 mx-7 text-center">{{ info.ranking }}</h1>
-                                        <h1 class="w-56 my-5 mx-7 text-center">{{info.name  }}</h1>
-                                        <h1 class="w-56 my-5 mx-7 text-center">{{ info.examineeNumber }}</h1>
+                                        <h1 class="w-56 my-5 mx-7 text-center">{{ group.examinees[index].ranking }}{{index+1}}</h1>
+                                        <h1 class="w-56 my-5 mx-7 text-center">{{group.examinees[index].name  }}</h1>
+                                        <h1 class="w-56 my-5 mx-7 text-center">{{ group.examinees[index].examineeNumber }}</h1>
                                         <!-- <div class="w-56 my-5 mx-7 items-center">
                                             <img v-if="info.check==true" src="@/assets/check.png" class=" cursor-pointer">
                                         </div> -->
@@ -250,7 +272,7 @@ export default{
                             </draggable>
                         </div>
                         <div class="flex justify-end">
-                            <BlackButton buttonType="儲存" length="w-button-short" @toggle="()=>{group.id===undefined?postGroups(index):patchGroups(index)}"></BlackButton>
+                            <BlackButton buttonType="儲存" length="w-button-short" @toggle="()=>{group.id===undefined?postGroups(gindex):patchGroups(gindex)}"></BlackButton>
                         </div>
                     </div>
                     

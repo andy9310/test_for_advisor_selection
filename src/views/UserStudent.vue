@@ -14,61 +14,80 @@ export default{
   data() {
     return {
       userEmail: this.$store.state.email,
-      studentId:0,
-      teamType:'',
-      num_limit:6,
+      ranking_id:'',
+      studentInfo:{
+        id:'',
+        name:'',
+        teamType:'',
+        examineeNumber:'',
+      },
+      num_limit:0,
       group:'',
       selected_professors:[],
       advisors_name:[''],
+      advisor_infos:[],
       now_selected:'',
-      send:false,
+      lock:false,
+      amount:0,
     };
   },
   mounted(){
     this.getAllAdvisor();
-    for(let i = 0;i < this.num_limit;i++){
-      this.selected_professors.push('')
-    }
-    
   },
   methods: {
     async getRanking(){
-      const response = await axios.get('/preference-ranking/me')
-      if(response.data.length===0){
-        this.startRanking();
+      const group_response = await axios.get('/student-group/')
+      let tmpGroups = group_response.data.filter(group=>group.teamType===this.studentInfo.teamType)
+      for(let i = 0;i<tmpGroups.length;i++){
+        if(tmpGroups[i].examinees.filter(examinee=>examinee.examineeNumber===this.studentInfo.examineeNumber).length!==0){
+          this.group = tmpGroups[i].groupName;
+          this.num_limit = tmpGroups[i].preferenceQuantity;
+          break;
+        }
       }
-    },
-    async startRanking(){
-      console.log(this.studentId);
-      const response = await axios.post('/preference-ranking/',{
-        studentId: parseInt(this.studentId,10)
-      })
-      if(response.status === 201){
-        alert('post success')
-        console.log(response);
+      const response = await axios.get('/preference-ranking/me')
+      console.log(response)
+      if(response.data.length===0){
+        const res = await axios.post('/preference-ranking/',{
+          studentId: parseInt(this.studentInfo.id,10)
+        })
+        if(res.status === 201){
+          alert('post success')
+          console.log(res);
+        }
+        else{
+          alert(res.status)
+        }
       }
       else{
-        alert(response.status)
+        this.ranking_id = response.data[0].id
+        this.lock = response.data[0].locked
+        this.amount = response.data[0].rankings.length
+        console.log(this.amount)
+        for(let j = 0;j<this.num_limit;j++){
+          if(response.data[0].rankings[j]!==undefined){
+            this.selected_professors.push(response.data[0].rankings[j].advisor.name)
+          }
+        }
       }
-
-    },
-    async getSelf(){
-      const response = await axios.get('/account/'+this.userEmail)
-      this.teamType = response.data.student.teamType
-      this.studentId = response.data.student.id
+      for(let i = this.selected_professors.length;i < this.num_limit;i++){
+        this.selected_professors.push('')
+      }
     },
     async getAllAdvisor(){
-      this.getSelf();
-      const response = await axios.get('/account/',{params:{type:'advisor'}})
-      let tmp_advisors = response.data.filter(account=>account.advisor!==undefined)
+      const response = await axios.get('/account/'+this.userEmail)
+      this.studentInfo = response.data.student
+      const res = await axios.get('/account/',{params:{type:'advisor'}})
+      this.advisor_infos = res.data
+      let tmp_advisors = res.data.filter(account=>account.advisor!==undefined)
       for(let i = 0; i < tmp_advisors.length; i++){
-        if(tmp_advisors[i].advisor.A===true && this.teamType==='A'){
+        if(tmp_advisors[i].advisor.A===true && this.studentInfo.teamType==='A'){
           this.advisors_name.push(tmp_advisors[i].advisor.name);
         }
-        else if(tmp_advisors[i].advisor.B===true && this.teamType==='B'){
+        else if(tmp_advisors[i].advisor.B===true && this.studentInfo.teamType==='B'){
           this.advisors_name.push(tmp_advisors[i].advisor.name);
         }
-        else if(tmp_advisors[i].advisor.C===true && this.teamType==='C'){
+        else if(tmp_advisors[i].advisor.C===true && this.studentInfo.teamType==='C'){
           this.advisors_name.push(tmp_advisors[i].advisor.name);
         }
       }
@@ -86,6 +105,31 @@ export default{
       }
       this.selected_professors[index] = value;
       console.log(this.selected_professors)
+      this.saveReference()
+    },
+    async saveReference(){
+      if(this.lock === true){
+        return
+      }
+      let ranking = []
+      for(let i = 0;i<this.selected_professors.length;i++){
+        if(this.selected_professors[i] === ''){
+          continue
+        }
+        let mail = this.advisor_infos.filter(advisor=>advisor.advisor.name === this.selected_professors[i])[0].email
+        const res = await axios.get('/account/'+mail)
+        ranking.push({'advisorId':res.data.advisor.id});
+      }
+      const response = await axios.put('/preference-ranking/'+this.ranking_id+'/fill-ranking',ranking)
+      console.log(response)
+      location.reload();
+    },
+    async patchReference(){
+      const response = await axios.patch('/preference-ranking/'+this.ranking_id,{
+        locked:true
+      })
+      console.log(response)
+      this.lock = true
     }
   },
 }
@@ -111,7 +155,7 @@ export default{
             <div class="flex flex-col h-full mt-10 ">
                 <div class="rounded-3xl bg-white bg-opacity-80  flex flex-col w-11/12 h-5/6 z-50 py-10 px-10 relative">
                     <h1 class="text-xl font-bold">填選指導教授</h1>
-                    <h1>{{teamType==='A'?'甲組':(teamType==='B'?'乙組':'丙組')}}{{ group }}志願序最多填選{{num_limit}}位教授。請確認已與教授洽談過，送出志願序後<br>即無法自行修改，如需修改請聯絡所辦。</h1>
+                    <h1>{{studentInfo.teamType==='A'?'甲組':(studentInfo.teamType==='B'?'乙組':'丙組')}}{{ group }}志願序最多填選{{num_limit}}位教授。請確認已與教授洽談過，送出志願序後<br>即無法自行修改，如需修改請聯絡所辦。</h1>
                     <div class="flex flex-row mt-10">
                       <h1 class="w-40">志願序</h1>
                       <h1>教授姓名</h1>
@@ -122,7 +166,9 @@ export default{
                             ghost-class="ghost"
                             :forceFallback="true"
                             :fallbackOnBody="true"
-                            fallbackClass="fallback" >
+                            fallbackClass="fallback" 
+                            @change="saveReference"
+                            >
                       <template #item="{ index }">
                         <div class="flex flex-row w-full relative my-5 items-center">
                             <div class="w-40  items-center flex flex-row">
@@ -135,13 +181,13 @@ export default{
                       </template>
                         
                     </draggable>
-                    <div v-if="send===false" class="absolute bottom-5 right-20" v-on:click="send=true">
-                      <BlackButton  buttonType="送出志願序" length='w-32' />
+                    <div v-if="lock===false" class="absolute bottom-5 right-20">
+                      <BlackButton  buttonType="送出志願序" length='w-32' @toggle="patchReference"/>
                     </div>
-                    <div v-if="send===true" class="absolute bottom-5 right-20">
+                    <div v-if="lock===true" class="absolute bottom-5 right-20">
                       <button  class="w-32 bg-[#E9E9EE] rounded-xl py-2 text-[#B6B6BD] my-10">送出志願序</button>
                     </div>
-                    <div v-if="send===true" class="flex flex-row absolute bottom-5 left-20 my-10 items-center">
+                    <div v-if="lock===true" class="flex flex-row absolute bottom-5 left-20 my-10 items-center">
                       <img src="@/assets/check-circle.png" class="w-5 h-5">
                       <h1>已成功送出志願序</h1>
                     </div>

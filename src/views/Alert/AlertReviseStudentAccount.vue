@@ -1,5 +1,6 @@
 <script>
 import PlainTextField from '../../components/PlainTextField.vue';
+import axios from '../../utils/axios';
   export default {
     components: {
     PlainTextField,
@@ -8,20 +9,32 @@ import PlainTextField from '../../components/PlainTextField.vue';
     },
     data() {
       return {
-        name: '',
-        email:'',
-        phone:'',
+        id: '',
+        accountInfo:{
+          name:'',
+          email:'',
+          phoneNumber:'',
+        }
 
       };
     },
     created(){
-        this.name = this.$route.params.name
+        this.id = this.$route.params.studentid
+    },
+    mounted(){
+      this.getAllAccount();
     },
     computed: {
     },
     methods: {
       closeAlert() {
         this.$router.replace('/admin-accountmanage');
+      },
+      async getAllAccount(){
+        const response = await axios.get('/account/',{params:{type:'student'}})
+        let account = response.data.filter(account=>account.student.id===this.id)[0] 
+        console.log(response.data);
+        console.log(account);
       }
     }
   }
@@ -36,15 +49,15 @@ import PlainTextField from '../../components/PlainTextField.vue';
           </div>
           <div class="flex flex-row items-center">
             <h1 class="w-28">學生姓名: </h1>
-            <PlainTextField length="w-short"  :class="'my-3'" v-model="name" />
+            <PlainTextField length="w-short"  :class="'my-3'" v-model="accountInfo.name" />
           </div>
           <div class="flex flex-row items-center">
             <h1 class="w-28">信箱: </h1>
-            <PlainTextField length="w-middle"  :class="'my-3'" v-model="email" />
+            <PlainTextField length="w-middle"  :class="'my-3'" v-model="accountInfo.email" />
           </div>
           <div class="flex flex-row items-center">
             <h1 class="w-28">行動電話: </h1>
-            <PlainTextField length="w-middle"  :class="'my-3'" v-model="phone" />
+            <PlainTextField length="w-middle"  :class="'my-3'" v-model="accountInfo.phoneNumber" />
           </div>
           <div class="flex items-end justify-end">
             <button class="mt-10 text-lg border border-black w-20 h-10 rounded-lg mb-4 mx-3 py-2" @click="closeAlert">

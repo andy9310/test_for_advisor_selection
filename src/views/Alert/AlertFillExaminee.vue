@@ -8,13 +8,13 @@ import axios from '../../utils/axios';
     name: 'AlertFillExaminee',
     data(){
         return{
-            group:'',
+            groupid:'',
             team:'',
             excel_examinee:'',
         }
     },
     created(){
-        this.group = this.$route.params.group
+        this.groupid = this.$route.params.groupid
         this.team = this.$route.params.team
     },
     computed: {
@@ -23,17 +23,37 @@ import axios from '../../utils/axios';
       closeAlert() {
         this.$router.replace(`/admin-studentgroup/${this.team}`);
       },
+      async patchexaminee(id_array){
+        
+        const response = await axios.get('/student-group/'+this.groupid)
+        response.data.examinees.map((examinee)=>{
+          id_array.push(examinee.id)
+        })
+        const res = await axios.patch('/student-group/'+this.groupid,{
+          groupName: response.data.groupName,
+          teamType: response.data.teamType,
+          preferenceQuantity: response.data.preferenceQuantity,
+          requiredAdvisorApproval: response.data.requiredAdvisorApproval,
+          enabledAdvisorQuotaCheck: response.data.enabledAdvisorQuotaCheck,
+          openAt: response.data.openAt,
+          closeAt: response.data.closeAt,
+          examinees: id_array
+        })
+        if(res.status===200){
+          alert('ok')
+        }
+      },
       async fillExaminee(){
         //console.log( this.excel_examinee.split(/[\t ]+/))
         let tmp_examinees = this.excel_examinee.split(/[\t ]+/);
         let examinees = [];
-        for (let i = 0; i < tmp_examinees.length; i += 4) {
-          let array = tmp_examinees.slice(i, i + 4);
+        for (let i = 0; i < tmp_examinees.length; i += 5) {
+          let array = tmp_examinees.slice(i, i + 5);
           let examinee_object = {
             'admission':array[0],
             'ranking':array[1],
-            'name':array[3],
-            'examineeNumber':array[2],
+            'name':array[4],
+            'examineeNumber':array[3],
           }
           examinees.push(examinee_object);
         }
@@ -43,6 +63,12 @@ import axios from '../../utils/axios';
           alert('匯入成功');
           this.excel_examinee = '';
         }
+        let ids = []
+        const examinee_response = await axios.get('/examinee/')
+        examinees.map((examinee)=>{
+          ids.push(examinee_response.data.filter(examine=>examine.examineeNumber === examinee.examineeNumber)[0].id)
+        })
+        this.patchexaminee(ids);
       }
     }
   }

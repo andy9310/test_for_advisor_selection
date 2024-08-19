@@ -41,9 +41,13 @@ import axios from '../../utils/axios';
         console.log(this.studentGroups)
       },
       async postGroupQuota(){
+        let postIds = []
+        this.value.map((group)=>{
+          postIds.push(group.id);
+        })
         const response = await axios.post('/group-quota-limit/',{
           quota: parseInt(this.quota,10),
-          studentGroups: this.value,
+          studentGroupIds: postIds,
         })
         if(response.status===201){
           alert('群組規則儲存成功');

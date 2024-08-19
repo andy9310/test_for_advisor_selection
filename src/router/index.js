@@ -30,9 +30,9 @@ const router = createRouter({
       component: () => import('../views/Alert/AlertPassword.vue')
     },
     {
-      path: '/alert-deletegroup/:group',
-      name: 'AlertDeleteGroup',
-      component: () => import('../views/Alert/AlertDeleteGroup.vue'),
+      path: '/alert-admin-resetpassword/:email',
+      name: 'AlertResetPassword',
+      component: () => import('../views/Alert/AlertResetPassword.vue'),
     },
     {
       path: '/alert-patchgroup/:team/:type',
@@ -40,14 +40,19 @@ const router = createRouter({
       component: () => import('../views/Alert/AlertPatchGroup.vue'),
     },
     {
-      path: '/alert-fillexaminee/:team/:group',
+      path: '/alert-fillexaminee/:team/:groupid',
       name: 'AlertFillExaminee',
       component: () => import('../views/Alert/AlertFillExaminee.vue'),
     },
     {
-      path: '/alert-admin-resetpassword/:email',
-      name: 'AlertResetPassword',
-      component: () => import('../views/Alert/AlertResetPassword.vue'),
+      path: '/alert-addexaminee/:team/:groupid/:index',
+      name: 'AlertAddExaminee',
+      component: () => import('../views/Alert/AlertAddExaminee.vue'),
+    },
+    {
+      path: '/alert-patchexaminee/:team/:groupid/:id',
+      name: 'AlertPatchExaminee',
+      component: () => import('../views/Alert/AlertPatchExaminee.vue'),
     },
     {
       path: '/alert-admin-deleteaccount/:email',
@@ -55,7 +60,17 @@ const router = createRouter({
       component: () => import('../views/Alert/AlertDeleteAccount.vue'),
     },
     {
-      path: '/alert-admin-revisestudentaccount/:name',
+      path: '/alert-deletegroup/:group',
+      name: 'AlertDeleteGroup',
+      component: () => import('../views/Alert/AlertDeleteGroup.vue'),
+    },
+    {
+      path: '/alert-deleteexaminee/:id/:team',
+      name: 'AlertDeleteExaminee',
+      component: () => import('../views/Alert/AlertDeleteExaminee.vue'),
+    },
+    {
+      path: '/alert-admin-revisestudentaccount/:studentid',
       name: 'AlertReviseStudentAccount',
       component: () => import('../views/Alert/AlertReviseStudentAccount.vue'),
     },
